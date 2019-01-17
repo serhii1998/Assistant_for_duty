@@ -26,12 +26,22 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
         if(s.equals("/start")){
-            sendFirstMsg(sendMessage);
+            sendMessage.setText("Привет! Напиши номер комнаты, дату дежурства которой хочешь узнать");
+            execute(sendMessage);
+            return;
         }
 
-        getDateAttendant(s, sendMessage);
-        workDB(update);
-        execute(sendMessage);
+        if(checkExistenceThisRoomAndSetDateAttendantToSendMessage(s, sendMessage)){
+            workDB(update);
+            if (sendMessage.getText().trim().equals("")){
+                execute(sendMessage.setText("В графике пока нет даты следующего дежурства." +
+                        " Следите за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
+            }else {
+                execute(sendMessage);
+            }
+        }else {
+            execute(sendMessage.setText("Такой комнаты нет в графике"));
+        }
     }
 
     private void workDB(Update update){
@@ -85,15 +95,4 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         return "701533339:AAGZpsNPVAblKnbq_kxkYOcTMX3F4gJKlSg";
     }
 
-    public void sendFirstMsg(SendMessage sendMessage){
-
-        sendMessage.setText("Привет! напиши номер комнаты, дату дежурства которой хочешь узнать");
-
-        try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-
-    }
 }
