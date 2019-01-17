@@ -14,7 +14,6 @@ public class UpTimeThread implements Runnable {
             System.out.println("in UpTimeThread while");
 
             StringBuilder stringBuilder = new StringBuilder();
-            String str;
 
             try(InputStream inputStream = new URL("https://assistant-attendant.herokuapp.com/").openStream();
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)){
@@ -26,9 +25,9 @@ public class UpTimeThread implements Runnable {
 
                 System.out.println(stringBuilder.toString());
 
-                System.out.println("in UpTimeThread while sleep 600000");
+                System.out.println("in UpTimeThread while sleep 300000");
 
-                sleep(600000);
+                sleep(300000);//пробуждение через каждые 5 мин
 
             }catch (Exception e){
                 e.printStackTrace();

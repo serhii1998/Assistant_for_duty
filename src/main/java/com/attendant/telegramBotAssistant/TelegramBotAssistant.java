@@ -1,58 +1,45 @@
 package com.attendant.telegramBotAssistant;
 
-import com.attendant.googleSpreadsheet.SheetsQuickstart;
-import com.attendant.utils.MyUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.text.ParseException;
-import java.util.List;
+import static com.attendant.utils.UtilsSpreadsheet.*;
+
 
 public class TelegramBotAssistant extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         String message = update.getMessage().getText();
-        sendMsg(update.getMessage().getChatId().toString(), message);
+        try {
+            sendMsg(update.getMessage().getChatId().toString(), message, update);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
 
-    private synchronized void sendMsg(String chatId, String s) {
+    private synchronized void sendMsg(String chatId, String s, Update update) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
         //setButtons(sendMessage);
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
-
         if(s.equals("/start")){
             sendFirstMsg(sendMessage);
         }
-        List<List<Object>> values = null;
-        try {
-            values = SheetsQuickstart.infoAttendantGoogleSpreadsheet();
-        } catch (Exception e) {
-            System.out.println("sendMsg catch");
-            e.printStackTrace();
-        }
-        if (values != null) {
-            for (List row : values) {
-                for (int i = 0; i < row.size(); i++) {
-                    if (s.equals(row.get(i).toString())) { // если переданая в сообщении комната равна комнате в БД из Гугл таблиц
-                        String dateAttendant = row.get(i + 1).toString();// то достанем дату дежурства, а это соседняя колонка
 
-                        try {
-                            if (!MyUtils.thisDateAlreadyPassed(dateAttendant)) { // прошла ли дата дежурства
-                                sendMessage.setText(dateAttendant);
-                                execute(sendMessage);
-                            }
-                        } catch (ParseException | TelegramApiException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
+        getDateAttendant(s, sendMessage);
+        workDB(update);
+        execute(sendMessage);
     }
+
+    private void workDB(Update update){
+
+
+
+    }
+
 
     public synchronized void setButtons(SendMessage sendMessage) {
         // Создаем клавиуатуру
