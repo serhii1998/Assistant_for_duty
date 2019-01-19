@@ -14,4 +14,13 @@ public class Human {
     private ArrayList<String> dateAttendant;
     private Room room;
 
+    public Human(long chat_id, ArrayList<String> dateAttendant, Room room) {
+        this.chat_id = chat_id;
+        this.dateAttendant = dateAttendant;
+        this.room = room;
+    }
+
+    public Human() {
+    }
+
 }

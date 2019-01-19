@@ -3,58 +3,124 @@ package com.attendant.telegramBotAssistant;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import static com.attendant.utils.UtilsSpreadsheet.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
+import static com.attendant.utils.UtilsSpreadsheet.*;
+import static com.attendant.utils.UtilsDB.*;
 
 public class TelegramBotAssistant extends TelegramLongPollingBot {
 
-    private boolean createReminder = false;
+    private boolean createReminder = false; // флаг, означающий, что пользователь хочет установить напоминание
 
     @Override
     public void onUpdateReceived(Update update) {
         String message = update.getMessage().getText();
+        String chatId = update.getMessage().getChatId().toString();
+        switch (message) {
+            case "/start":
+                message = "Привет! Напиши номер комнаты, дату дежурства которой хочешь узнать";
+                sendMsg(message, chatId);
+                break;
+            case "Создать напоминание":
+                message = "Введите комнату на которую хотите создать напоминание";
+                createReminder = true;
+                sendMsg(message, chatId);
+                break;
+            default:
+                System.out.println("1");
+                sendMsgSearchDateDuty(chatId, message);
+                break;
+        }
+
+    }
+
+    private synchronized void sendMsg(String message, String chatId) {
+        SendMessage sendMessage = new SendMessage();
+        setButtons(sendMessage);
+        sendMessage.enableMarkdown(true);
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(message);
         try {
-            sendMsg(update.getMessage().getChatId().toString(), message, update);
+            execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
 
-    private synchronized void sendMsg(String chatId, String s, Update update) throws TelegramApiException {
+    private synchronized void sendMsgSearchDateDuty(String chatId, String message) {
         SendMessage sendMessage = new SendMessage();
-        //setButtons(sendMessage);
+        setButtons(sendMessage);
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
-        if(s.equals("/start")){
-            sendMessage.setText("Привет! Напиши номер комнаты, дату дежурства которой хочешь узнать");
-            execute(sendMessage);
-            return;
-        }
 
-        if(checkExistenceThisRoomAndSetDateAttendantToSendMessage(s, sendMessage) && !createReminder){
-            workDB(update);
-            if (sendMessage.getText().trim().equals("")){
-                execute(sendMessage.setText("В графике пока нет даты следующего дежурства." +
-                        " Следите за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
-            }else {
-                execute(sendMessage);
+        try {
+            if (checkExistenceThisRoomAndSetDateDutyToSendMessage(message, sendMessage) && !createReminder) {
+                if (sendMessage.getText().trim().equals("")) {
+                    execute(sendMessage.setText("В графике пока нет даты следующего дежурства." +
+                            " Следите за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
+                } else {
+                    execute(sendMessage);
+                }
+            } else if (!createReminder) {// здесь нужно это условие, что бы в случае установки напоминание бот не попадал в этот else
+                execute(sendMessage.setText("Такой комнаты нет в графике"));
             }
-        }else {
-            execute(sendMessage.setText("Такой комнаты нет в графике"));
-        }
 
-        if(checkExistenceThisRoomAndSetDateAttendantToSendMessage(s, sendMessage) && createReminder){
+            if (checkExistenceThisRoomAndSetDateDutyToSendMessage(message, sendMessage) && createReminder) {
 
+                String dateDutyFromSendMessage = sendMessage.getText();// по моей логике, тут должна быть дата дежурства, которая добавилась из метода checkExistenceThisRoomAndSetDateDutyToSendMessage.
+                String room = message;
+
+                createReminder = false; // флаг. когда он в инверсии, это значит, что установки напоминания небыло.
+                // Пользователь просто хочет узнать дату дежурства
+                if (dateDutyFromSendMessage.trim().equals("")) {
+                    try {// в таблице нету след даты дежурства, но напоминание все равно должно быть установлено
+                        workDB(chatId, room, dateDutyFromSendMessage);
+                        execute(sendMessage.setText("Напоминание создано. пока следующей даты дежурства нету. " +
+                                "Бот будет предупреждать о наступлении дежурства в течении 3-х дней перед " +
+                                "дежурством включая день дежурства." +
+                                " Следите за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
+
+                    } catch (Exception e) {
+                        execute(sendMessage.setText("Что-то пошло не так( мы работаем над устранением неисправности"));
+                        System.out.println("catch create reminder in sendMsgSearchDateDuty");
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    try { // все ок, комната найдена и напоминание установлено
+                        workDB(chatId, room, dateDutyFromSendMessage);
+                        execute(sendMessage.setText("Напоминание создано. Бот напомнит о дежурстве в течении " +
+                                "3 дней до наступления дежурства включая день дежурства."));
+                    } catch (TelegramApiException e) {
+                        execute(sendMessage.setText("Что-то пошло не так"));
+                        System.out.println("sendMsgSearchDateDuty catch create reminder");
+                        e.printStackTrace();
+                    }
+                }
+            } else if (createReminder) {
+                execute(sendMessage.setText("Такой комнаты нет в графике")); // если такой комнаты не существует
+            }
+
+        } catch (Exception e) {
+            System.out.println("sendMsgSearchDateDuty catch");
+            e.printStackTrace();
         }
     }
 
-    private void workDB(Update update){
+    private void workDB(String chatId, String room, String dateDutyFromSendessage) {
         /*
-        * давай поразсуждаем. вот я уже определил, что эта комната существует в гугл таблице. все ок.
-        * но пользователь хочет установить напоинание. Для этого:
+         * давай поразсуждаем. вот я уже определил, что эта комната существует в гугл таблице. все ок.
+         * но пользователь хочет установить напоинание. Для этого:
          * 1. он должен ввести свою комнату.
          * 2. я эту комнату запоминаю, запоминаю chatid, с которого пришел запрос на напоминание.
          * 3. нахожу дату дежурства, когда надо ему напомнить.
@@ -65,48 +131,68 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
          * с которого поступил запрос на напоминание
          * 8. собственно вроде бы все. */
 
+        // находим целевую дату дежурства с помощью слова "дежурит"
+        String subString = "дежурит";
+        String dateDuty = dateDutyFromSendessage.substring(dateDutyFromSendessage.indexOf(subString) + subString.length()).trim();
+        System.out.println(dateDuty);
+        try (Connection connection = dataConnection()) {
+            PreparedStatement prepareStatement = connection.prepareStatement("select chat_id from reminder_for_duty where chat_id = ?");
+            prepareStatement.setString(1, chatId);
+            ResultSet resultSetChatId = prepareStatement.executeQuery();
 
+            if (resultSetChatId.next()) {
+
+                prepareStatement = connection.prepareStatement("update reminder_for_duty set number_room = ?, date_duty = ? where chat_id = ?");
+                prepareStatement.setString(1, room);
+                prepareStatement.setString(2, dateDuty);
+                prepareStatement.setString(3, resultSetChatId.getString("chat_id"));
+                prepareStatement.executeUpdate();
+
+            } else {
+
+                PreparedStatement preparedStatement = connection.prepareStatement("insert into reminder_for_duty (chat_id, number_room, date_duty) values (?,?,?)");
+                preparedStatement.setString(1, chatId);
+                preparedStatement.setString(2, room);
+                preparedStatement.setString(3, dateDuty.trim());
+                System.out.println(dateDuty.length() + "///////////////////////////////////////////////" + dateDuty.toString());
+
+                preparedStatement.execute();
+            }
+            resultSetChatId.close();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
 
     public synchronized void setButtons(SendMessage sendMessage) {
-        // Создаем клавиуатуру
-//        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-//        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-//        replyKeyboardMarkup.setSelective(true);
-//        replyKeyboardMarkup.setResizeKeyboard(true);
-//        replyKeyboardMarkup.setOneTimeKeyboard(false);
-//
-//        // Создаем список строк клавиатуры
-//        List<KeyboardRow> keyboard = new ArrayList<>();
-//
-//        // Первая строчка клавиатуры
-//        KeyboardRow keyboard1 = new KeyboardRow();
-//        // Добавляем кнопки в первую строчку клавиатуры
-//        keyboard1.add(new KeyboardButton("USD rate UAH"));
-//
-//        // Вторая строчка клавиатуры
-//        KeyboardRow keyboard2 = new KeyboardRow();
-//        // Добавляем кнопки во вторую строчку клавиатуры
-//        keyboard2.add(new KeyboardButton("EUR rate UAH"));
-//
-//        //Третья
-//        KeyboardRow keyboard3 = new KeyboardRow();
-//        // Добавляем кнопки в третью строчку клавиатуры
-//        keyboard3.add(new KeyboardButton("RUB rate UAH"));
-//
-//        // Добавляем все строчки клавиатуры в список
-//        keyboard.add(keyboard1);
-//        keyboard.add(keyboard2);
-//        keyboard.add(keyboard3);
-//        // и устанваливаем этот список нашей клавиатуре
-//        replyKeyboardMarkup.setKeyboard(keyboard);
+        //Создаем клавиуатуру
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(false);
+
+        KeyboardButton keyboardButton = new KeyboardButton("Создать напоминание");
+        KeyboardButton keyboardButton2 = new KeyboardButton("222222");
+
+        KeyboardRow keyboardRow = new KeyboardRow();
+        keyboardRow.add(keyboardButton);
+        keyboardRow.add(keyboardButton2);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(keyboardRow);
+
+        replyKeyboardMarkup.setKeyboard(keyboard);
+        sendMessage.setReplyMarkup(replyKeyboardMarkup);
     }
 
     @Override
     public String getBotUsername() {
-        return "AssistantAttendant";
+        return "Assistant_for_duty";
     }
 
     @Override

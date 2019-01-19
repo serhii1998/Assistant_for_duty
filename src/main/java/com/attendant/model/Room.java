@@ -11,4 +11,11 @@ public class Room {
     private ArrayList<Human> humans;
     private int numberRoom;
 
+    public Room() {
+    }
+
+    public Room(ArrayList<Human> humans, int numberRoom) {
+        this.humans = humans;
+        this.numberRoom = numberRoom;
+    }
 }

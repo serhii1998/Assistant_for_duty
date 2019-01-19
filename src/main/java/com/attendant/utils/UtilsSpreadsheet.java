@@ -22,7 +22,7 @@ public class UtilsSpreadsheet {
     }
 
     //возвращает true в случае, если искомая комната найдена
-    public static boolean checkExistenceThisRoomAndSetDateAttendantToSendMessage(String s, SendMessage sendMessage) {
+    public static boolean checkExistenceThisRoomAndSetDateDutyToSendMessage(String message, SendMessage sendMessage) {
         sendMessage.setText("");
         boolean existenceThisRoom = false; // флаг существования комнаты в гугл таблице.
         // Если ее там в гугл таблицах нет, то ее не нужно записывать в БД
@@ -39,12 +39,15 @@ public class UtilsSpreadsheet {
         if (values != null) {
             for (List row : values) {
                 for (int i = 0; i < row.size(); i++) {
-                    if (s.equals(row.get(i).toString())) { // если переданая в сообщении комната равна комнате в БД из Гугл таблиц
+                    if (message.equals(row.get(i).toString())) { // если переданая в сообщении комната равна комнате в БД из Гугл таблиц
                         existenceThisRoom = true;
-                        String dateAttendant = row.get(i + 1).toString();// то достанем дату дежурства, а это соседняя колонка
+                        String dateDuty = row.get(i + 1).toString().trim();// то достанем дату дежурства, а это соседняя колонка
                         try {
-                            if (!thisDateAlreadyPassed(dateAttendant)) { // прошла ли дата дежурства
-                                sendMessage.setText("Комната " + s + " дежурит " + dateAttendant);
+                            if (!thisDateAlreadyPassed(dateDuty)) { // прошла ли дата дежурства
+                                sendMessage.setText("Комната " + message + " дежурит " + dateDuty);// ВНИМАНИЕ!!! изменение єтого сообщения, которое в setText,
+                                //повлечет за собой изменение в данных, которые заносятся в базу. я парсю это сообщение, что бы найти в нем дату дежурства
+                                // (dateDuty). главное, что-бы осталось слово дежурит а за этим словом дальше шла дата,
+                                // так как привязываюсь для поиска я именно к слову дежурит
                                 break checkDate;
                             }
                         } catch (ParseException e) {
@@ -53,7 +56,6 @@ public class UtilsSpreadsheet {
                     }
                 }
             }
-
         }
 
         return existenceThisRoom;
