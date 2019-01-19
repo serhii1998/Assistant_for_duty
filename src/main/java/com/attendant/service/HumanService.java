@@ -1,4 +1,4 @@
-package com.service;
+package com.attendant.service;
 
 public class HumanService {
 }

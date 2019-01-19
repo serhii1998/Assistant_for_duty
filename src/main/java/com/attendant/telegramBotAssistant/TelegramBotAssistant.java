@@ -9,6 +9,9 @@ import static com.attendant.utils.UtilsSpreadsheet.*;
 
 
 public class TelegramBotAssistant extends TelegramLongPollingBot {
+
+    private boolean createReminder = false;
+
     @Override
     public void onUpdateReceived(Update update) {
         String message = update.getMessage().getText();
@@ -31,7 +34,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
             return;
         }
 
-        if(checkExistenceThisRoomAndSetDateAttendantToSendMessage(s, sendMessage)){
+        if(checkExistenceThisRoomAndSetDateAttendantToSendMessage(s, sendMessage) && !createReminder){
             workDB(update);
             if (sendMessage.getText().trim().equals("")){
                 execute(sendMessage.setText("В графике пока нет даты следующего дежурства." +
@@ -42,9 +45,25 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         }else {
             execute(sendMessage.setText("Такой комнаты нет в графике"));
         }
+
+        if(checkExistenceThisRoomAndSetDateAttendantToSendMessage(s, sendMessage) && createReminder){
+
+        }
     }
 
     private void workDB(Update update){
+        /*
+        * давай поразсуждаем. вот я уже определил, что эта комната существует в гугл таблице. все ок.
+        * но пользователь хочет установить напоинание. Для этого:
+         * 1. он должен ввести свою комнату.
+         * 2. я эту комнату запоминаю, запоминаю chatid, с которого пришел запрос на напоминание.
+         * 3. нахожу дату дежурства, когда надо ему напомнить.
+         * 4. запоминаю эту дату и записываю ее в базу к тому чату, от которого поступил запрос
+         * 5. потом у меня будет поток, который будет запускаться 1 раз в сутки, сканировать базу данных
+         * 6. он будет искать даты в ML? сравнивать с текущей.
+         * 7. если текущая дата на 2 меньше, чем в бд, то нужно отослать напоминание тому чату,
+         * с которого поступил запрос на напоминание
+         * 8. собственно вроде бы все. */
 
 
 
