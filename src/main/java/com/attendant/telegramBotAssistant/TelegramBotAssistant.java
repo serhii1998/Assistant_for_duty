@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.attendant.utils.UtilsSpreadsheet.*;
 import static com.attendant.utils.UtilsDB.*;
@@ -54,8 +55,6 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
-
-
 
     private synchronized void sendMsgSearchDateDutyInGoogleSpreadsheet(String chatId, String room) {
         SendMessage sendMessage = new SendMessage();
@@ -135,8 +134,8 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
 
         KeyboardButton keyboardButton = new KeyboardButton("Создать напоминание");
         KeyboardButton keyboardButton2 = new KeyboardButton("222222");
-
         KeyboardRow keyboardRow = new KeyboardRow();
+
         keyboardRow.add(keyboardButton);
         keyboardRow.add(keyboardButton2);
 
@@ -148,11 +147,34 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
     }
 
     /*
-    * 1. key - это значение дня. 0 - это текущий день. 1 - завтрашний. 2 - послезавтрашний
-    * 2. ArrayList<ReminderEntity> - это списки напоминаний для соответстующих дней(для тех, кто дежурит сегодня, завтра поле-завтра)*/
-    public static synchronized void sendReminder(HashMap<Integer, ArrayList<ReminderEntity>> mapReminders){
+     * 1. key - это значение дня. 0 - это текущий день. 1 - завтрашний. 2 - послезавтрашний
+     * 2. ArrayList<ReminderEntity> - это списки напоминаний для соответстующих дней(для тех, кто дежурит сегодня, завтра поле-завтра)
+     */
+    public synchronized void sendReminder(HashMap<Integer, ArrayList<ReminderEntity>> mapReminders) {
 
+        for (Map.Entry<Integer, ArrayList<ReminderEntity>> entry : mapReminders.entrySet()) {
+            int dayDuty = entry.getKey(); // 0 - сегодня, 1 - завтра, 2 - после-завтра
+            String message = "";
+            for (ReminderEntity r : entry.getValue()) {
+                switch (dayDuty) {
+                    case 1:
+                        message = "Привет! Комната " + r.getNumberRoom() + " сегодня дежурная. Удачного дня :)";
+                        sendMsg(message, r.getChatId());
+                        break;
+                    case 2:
+                        message = "Привет! Комната " + r.getNumberRoom() + " завтра дежурная. Удачного дня :)";
+                        sendMsg(message, r.getChatId());
+                        break;
+                    case 3:
+                        message = "Привет! Комната " + r.getNumberRoom() + " дежурнит через 2 дня (" + r.getDateDuty() + "). Удачного дня :)";
+                        sendMsg(message, r.getChatId());
+                        break;
+                }
+            }
+        }
     }
+
+
     @Override
     public String getBotUsername() {
         return "Assistant_for_duty";

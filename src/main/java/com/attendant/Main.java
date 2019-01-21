@@ -17,6 +17,7 @@
 package com.attendant;
 
 import com.attendant.telegramBotAssistant.TelegramBotAssistant;
+import com.attendant.threads.ReminderThread;
 import com.attendant.threads.UpTimeThread;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,6 +25,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 @Controller
 @SpringBootApplication
@@ -42,6 +46,26 @@ public class Main {
       Thread upTimeThread = new Thread(new UpTimeThread(), "UpTimeThread");
       upTimeThread.start();
 
+    ReminderThread reminderThread = new ReminderThread("ReminderThread");
+
+    if(startReminderThread()){
+      reminderThread.start();
+    }
+
+
+
+  }
+
+  private static boolean startReminderThread() {
+    GregorianCalendar gregorianCalendar = new GregorianCalendar();
+    GregorianCalendar timeReminder = new GregorianCalendar();
+    timeReminder.set(Calendar.YEAR, timeReminder.get(Calendar.YEAR));
+    timeReminder.set(Calendar.MONTH, timeReminder.get(Calendar.MONTH));
+    timeReminder.set(Calendar.DAY_OF_MONTH, timeReminder.get(Calendar.DAY_OF_MONTH));
+    timeReminder.set(Calendar.HOUR, 9);
+    timeReminder.set(Calendar.MINUTE, 0);
+    timeReminder.set(Calendar.SECOND, 0);
+    return gregorianCalendar.after(timeReminder);
   }
 
   @RequestMapping("/")

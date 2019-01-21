@@ -3,10 +3,13 @@ package com.attendant.utils;
 import com.attendant.model.ReminderEntity;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
 
 public class UtilsDB {
+
+    private static final int DAY_IN_MILLISECONDS = 86400000;
 
     private static final String USERNAME = "npuzgpmqumbnlt";
     private static final String PASSWORD = "07cf879928c6163797018e61397b2ecdbdfe2b6731ad51ac64d613b039c74d13";
@@ -19,41 +22,68 @@ public class UtilsDB {
         return connection;
     }
 
-    public static void saveReminderInDB(String chatId, String room, String dateDuty) {
-        /*
-         * давай поразсуждаем. вот я уже определил, что эта комната существует в гугл таблице. все ок.
-         * но пользователь хочет установить напоинание. Для этого:
-         * 1. он должен ввести свою комнату. +
-         * 2. я эту комнату запоминаю, запоминаю chatid, с которого пришел запрос на напоминание. +
-         * 3. нахожу дату дежурства, когда надо ему напомнить. +
-         * 4. запоминаю эту дату и записываю ее в базу к тому чату, от которого поступил запрос +
-         * 5. потом у меня будет поток, который будет запускаться 1 раз в сутки, сканировать базу данных
-         * 6. он будет искать даты в ДБ, сравнивать с текущей.
-         * 7. если текущая дата на 2 меньше, чем в бд, то нужно отослать напоминание тому чату,
-         * с которого поступил запрос на напоминание
-         * 8. собственно вроде бы все. */
-
+    public synchronized static void saveReminderInDB(String chatId, String room, String strDateDuty) {
         try (Connection connection = dataConnection()) {
-            PreparedStatement prepareStatement = connection.prepareStatement("select chat_id from reminder_for_duty where chat_id = ?");
-            prepareStatement.setString(1, chatId);
-            ResultSet resultSetChatId = prepareStatement.executeQuery();
+            // человек делает напоминание в день днжурства. нужно все выставить в true
+            // человек делает напоминание за день до дежурства. завтра и послезавтра делаю в true, а сегодня в false
+            // человек делает напоминание за 2 дня до дежурства. послезавтра делаю в true, а сегодня и завтра в false
+            // человек делает напоминание больше чем за 2 дня до дежурства. делаю все переменные в false
+            //dateDuty; дата дежурства
+            //если дата дежурства равна сегодняшней, то установить все даты в true
+            //если дата дежурства равна завтрашней, установить сегодня в false, осталоное в true
+            //если дата дежурства равна послезавтрашней, установить сегодня и завтра в false, после-завтра в true
+            //иначе все в false
+
+            boolean sendConfirmationCurDay = false;
+            boolean sendConfirmationOneDay = false;
+            boolean sendConfirmationTwoDay = false;
+
+            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+            Date dateDuty = format.parse(strDateDuty);
+
+            GregorianCalendar GCCurDay = new GregorianCalendar();
+
+            GregorianCalendar GCOneDay = new GregorianCalendar();
+            GCOneDay.add(Calendar.DAY_OF_MONTH, DAY_IN_MILLISECONDS);// завтра
+
+            GregorianCalendar GCTwoDay = new GregorianCalendar();
+            GCTwoDay.add(Calendar.DAY_OF_MONTH, DAY_IN_MILLISECONDS * 2); // после-завтра
+
+            if (dateDuty.equals(format.parse(format.format(GCCurDay.getTime())))) {
+                sendConfirmationCurDay = true;
+                sendConfirmationOneDay = true;
+                sendConfirmationTwoDay = true;
+            } else if (dateDuty.equals(format.parse(format.format(GCOneDay.getTime())))) {
+                sendConfirmationOneDay = true;
+                sendConfirmationTwoDay = true;
+            } else if (dateDuty.equals(format.parse(format.format(GCTwoDay.getTime())))) {
+                sendConfirmationTwoDay = true;
+            }
+
+            PreparedStatement preparedStatement = connection.prepareStatement("select chat_id from reminder_for_duty where chat_id = ?");
+            preparedStatement.setString(1, chatId);
+            ResultSet resultSetChatId = preparedStatement.executeQuery();
 
             if (resultSetChatId.next()) {
 
-                prepareStatement = connection.prepareStatement("update reminder_for_duty set number_room = ?, date_duty = ? ,send_confirmation_cur_day = false, send_confirmation_one_day = false, send_confirmation_two_day = false where chat_id = ?");
-                prepareStatement.setString(1, room);
-                prepareStatement.setString(2, dateDuty);
-                prepareStatement.setString(3, resultSetChatId.getString("chat_id"));
-                prepareStatement.executeUpdate();
+                preparedStatement = connection.prepareStatement("update reminder_for_duty set number_room = ?, date_duty = ? ,send_confirmation_cur_day = ?, send_confirmation_one_day = ?, send_confirmation_two_day = ? where chat_id = ?");
+                preparedStatement.setString(1, room);
+                preparedStatement.setString(2, strDateDuty);
+                preparedStatement.setBoolean(3, sendConfirmationCurDay);
+                preparedStatement.setBoolean(4, sendConfirmationOneDay);
+                preparedStatement.setBoolean(5, sendConfirmationTwoDay);
+                preparedStatement.setString(6, resultSetChatId.getString("chat_id"));
+                preparedStatement.executeUpdate();
 
             } else {
 
-                PreparedStatement preparedStatement = connection.prepareStatement("insert into reminder_for_duty (chat_id, number_room, date_duty, send_confirmation_two_day, send_confirmation_one_day, send_confirmation_cur_day) values (?,?,?,false,false,false)");
+                preparedStatement = connection.prepareStatement("insert into reminder_for_duty (chat_id, number_room, date_duty, send_confirmation_cur_day, send_confirmation_one_day, send_confirmation_two_day) values (?,?,?,?,?,?)");
                 preparedStatement.setString(1, chatId);
                 preparedStatement.setString(2, room);
-                preparedStatement.setString(3, dateDuty.trim());
-                System.out.println(dateDuty.length() + "///////////////////////////////////////////////" + dateDuty.toString());
-
+                preparedStatement.setString(3, strDateDuty.trim());
+                preparedStatement.setBoolean(4, sendConfirmationCurDay);
+                preparedStatement.setBoolean(5, sendConfirmationOneDay);
+                preparedStatement.setBoolean(6, sendConfirmationTwoDay);
                 preparedStatement.execute();
             }
             resultSetChatId.close();
@@ -63,6 +93,7 @@ public class UtilsDB {
             System.out.println("catch saveReminderInDB incorrect sql query");
             e.printStackTrace();
         }
+
     }
 
     // метод, который получает из базы созданное напоминание по переданной дате
