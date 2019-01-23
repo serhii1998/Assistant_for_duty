@@ -36,7 +36,7 @@ public class UtilsSpreadsheet {
         try {
             values = SheetsQuickstart.infoAttendantGoogleSpreadsheet(); // получаем заданную страницу в виде вдумерного массива
         } catch (Exception e) {
-            System.out.println("sendMsg catch");
+            logger.warn("******** UtilsSpreadsheet ->  checkExistenceThisRoomAndSetDateDutyToSendMessage -> Exception values");
             e.printStackTrace();
         }
 
@@ -64,7 +64,7 @@ public class UtilsSpreadsheet {
             }
         }
 
-        logger.info("******** UtilsSpreadsheet -> checkExistenceThisRoomAndSetDateDutyToSendMessage -> \n sendMessage.getText() == {}, existenceThisRoom == {}",sendMessage.getText(), existenceThisRoom);
+        logger.info("******** UtilsSpreadsheet -> checkExistenceThisRoomAndSetDateDutyToSendMessage -> \n sendMessage.getText() == {}, existenceThisRoom == {}", sendMessage.getText(), existenceThisRoom);
         return existenceThisRoom;
     }
 

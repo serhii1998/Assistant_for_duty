@@ -170,7 +170,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
                 if (!dateDutyFromSendMessage.equals("")) {//если в гугл таблице существует дата следующего дежурства, то получить его из sendMessage и распарсить, та как там не чистая дата а уже готовое сообщение.
                     dateDuty = dateDutyFromSendMessage.substring(dateDutyFromSendMessage.indexOf(subString) + subString.length()).trim();
                 }
-                logger.info("chat_id = " + chatId + " room = " + room + " date_duty = " + dateDutyFromSendMessage);
+                logger.info("chat_id == {}, room == {}, dateDutyFromSendMessage == {}, dateDuty == {}", chatId, room, dateDutyFromSendMessage, dateDuty);
 
                 // Пользователь просто хочет узнать дату дежурства
                 if (dateDuty.equals("")) {

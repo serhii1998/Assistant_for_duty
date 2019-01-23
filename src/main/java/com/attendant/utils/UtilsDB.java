@@ -12,7 +12,6 @@ import java.util.Date;
 public class UtilsDB {
 
     private static Logger logger = LoggerFactory.getLogger(UtilsDB.class);
-    private static final int DAY_IN_MILLISECONDS = 86400000;
 
     private static final String USERNAME = "npuzgpmqumbnlt";
     private static final String PASSWORD = "07cf879928c6163797018e61397b2ecdbdfe2b6731ad51ac64d613b039c74d13";
@@ -36,7 +35,7 @@ public class UtilsDB {
     //иначе все в false
 
     public synchronized static void saveReminderInDB(String chatId, String room, String strDateDuty) {
-        logger.info("////// UtilsDB -> saveReminderInDB -> chatId =={}, room == {}, strDateDuty == {}, strDateDuty.equals(\"\") == {}", chatId, room, strDateDuty, strDateDuty.equals(""));
+        logger.info("////// UtilsDB -> saveReminderInDB -> chatId == {}, room == {}, strDateDuty == {}, strDateDuty.equals(\"\") == {}", chatId, room, strDateDuty, strDateDuty.equals(""));
         try (Connection connection = dataConnection()) {
 
             boolean sendConfirmationCurDay = false;
@@ -44,25 +43,32 @@ public class UtilsDB {
             boolean sendConfirmationTwoDay = false;
 
             if (!strDateDuty.equals("")) {
+                logger.info("////// UtilsDB -> saveReminderInDB -> !strDateDuty.equals(\"\") == {}", !strDateDuty.equals(""));
                 SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
                 Date dateDuty = format.parse(strDateDuty);
 
                 GregorianCalendar GCCurDay = new GregorianCalendar();
+                Date today = format.parse(format.format(GCCurDay.getTime()));
 
                 GregorianCalendar GCOneDay = new GregorianCalendar();
-                GCOneDay.add(Calendar.DAY_OF_MONTH, DAY_IN_MILLISECONDS);// завтра
+                GCOneDay.add(Calendar.DAY_OF_MONTH, 1);// завтра
+                Date tomorrow = format.parse(format.format(GCOneDay.getTime()));
 
                 GregorianCalendar GCTwoDay = new GregorianCalendar();
-                GCTwoDay.add(Calendar.DAY_OF_MONTH, DAY_IN_MILLISECONDS * 2); // послезавтра
+                GCTwoDay.add(Calendar.DAY_OF_MONTH, 2); // послезавтра
+                Date afterTomorrow = format.parse(format.format(GCTwoDay.getTime()));
 
-                if (dateDuty.equals(format.parse(format.format(GCCurDay.getTime())))) {
+                logger.warn("///// dateDuty.equals(today) == {}, dateDuty == {}, today == {}", dateDuty.equals(today), dateDuty, today);
+                logger.warn("///// dateDuty.equals(tomorrow) == {}, dateDuty == {}, tomorrow == {}", dateDuty.equals(tomorrow), dateDuty, tomorrow);
+                logger.warn("///// dateDuty.equals(afterTomorrow) == {}, dateDuty == {}, afterTomorrow == {}", dateDuty.equals(afterTomorrow), dateDuty, afterTomorrow);
+                if (dateDuty.equals(today)) {
                     sendConfirmationCurDay = true;
                     sendConfirmationOneDay = true;
                     sendConfirmationTwoDay = true;
-                } else if (dateDuty.equals(format.parse(format.format(GCOneDay.getTime())))) {
+                } else if (dateDuty.equals(tomorrow)) {
                     sendConfirmationOneDay = true;
                     sendConfirmationTwoDay = true;
-                } else if (dateDuty.equals(format.parse(format.format(GCTwoDay.getTime())))) {
+                } else if (dateDuty.equals(afterTomorrow)) {
                     sendConfirmationTwoDay = true;
                 }
             }
@@ -139,18 +145,25 @@ public class UtilsDB {
         logger.info("///// UtilsDB -> setStatusSendingReminder -> mapReminders == {}", mapReminders.toString());
 
         try (Connection connection = dataConnection()) {
+            PreparedStatement preparedStatement = null;
             for (Map.Entry<Integer, ArrayList<ReminderEntity>> entry : mapReminders.entrySet()) {
                 int dayDuty = entry.getKey(); // 0 - сегодня, 1 - завтра, 2 - послезавтра
                 for (ReminderEntity r : entry.getValue()) {
                     switch (dayDuty) {
                         case 0:
-                            connection.prepareStatement("update reminder_for_duty set send_confirmation_cur_day = true").executeUpdate();
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_cur_day = true where chat_id = ?");
+                            preparedStatement.setString(1, r.getChatId());
+                            preparedStatement.executeUpdate();
                             break;
                         case 1:
-                            connection.prepareStatement("update reminder_for_duty set send_confirmation_one_day = true").executeUpdate();
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_one_day = true where chat_id = ?");
+                            preparedStatement.setString(1, r.getChatId());
+                            preparedStatement.executeUpdate();
                             break;
                         case 2:
-                            connection.prepareStatement("update reminder_for_duty set send_confirmation_two_day = true").executeUpdate();
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_two_day = true where chat_id = ?");
+                            preparedStatement.setString(1, r.getChatId());
+                            preparedStatement.executeUpdate();
                             break;
                     }
                 }
