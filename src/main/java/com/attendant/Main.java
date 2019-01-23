@@ -33,44 +33,28 @@ import java.util.GregorianCalendar;
 @SpringBootApplication
 public class Main {
 
-  public static void main(String[] args) {
-    SpringApplication.run(Main.class, args);
-      ApiContextInitializer.init();
-      TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
-      try {
-          telegramBotsApi.registerBot(new TelegramBotAssistant());
-      } catch (Exception e) {
-          e.printStackTrace();
-      }
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
+        ApiContextInitializer.init();
+        TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
+        try {
+            telegramBotsApi.registerBot(new TelegramBotAssistant());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-      Thread upTimeThread = new Thread(new UpTimeThread(), "UpTimeThread");
-      upTimeThread.start();
+        Thread upTimeThread = new Thread(new UpTimeThread(), "UpTimeThread");
+        upTimeThread.start();
 
-    ReminderThread reminderThread = new ReminderThread("ReminderThread");
 
-    if(startReminderThread()){
-      reminderThread.start();
+        ReminderThread reminderThread = new ReminderThread("ReminderThread");
+        reminderThread.start();
+
     }
 
-
-
-  }
-
-  private static boolean startReminderThread() {
-    GregorianCalendar gregorianCalendar = new GregorianCalendar();
-    GregorianCalendar timeReminder = new GregorianCalendar();
-    timeReminder.set(Calendar.YEAR, timeReminder.get(Calendar.YEAR));
-    timeReminder.set(Calendar.MONTH, timeReminder.get(Calendar.MONTH));
-    timeReminder.set(Calendar.DAY_OF_MONTH, timeReminder.get(Calendar.DAY_OF_MONTH));
-    timeReminder.set(Calendar.HOUR, 9);
-    timeReminder.set(Calendar.MINUTE, 0);
-    timeReminder.set(Calendar.SECOND, 0);
-    return gregorianCalendar.after(timeReminder);
-  }
-
-  @RequestMapping("/")
-  String index() {
-    return "index";
-  }
+    @RequestMapping("/")
+    String index() {
+        return "index";
+    }
 
 }
