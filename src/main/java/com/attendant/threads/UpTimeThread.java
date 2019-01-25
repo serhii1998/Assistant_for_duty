@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import static java.lang.Thread.sleep;
 
@@ -15,12 +17,21 @@ public class UpTimeThread implements Runnable {
 
     @Override
     public void run() {
+        GregorianCalendar doNotUpTime = new GregorianCalendar();
+        doNotUpTime.set(Calendar.HOUR_OF_DAY, 23);
+        doNotUpTime.set(Calendar.MINUTE, 50);
+        doNotUpTime.set(Calendar.SECOND, 0);
+
         while (true) {
-            System.out.println("in UpTimeThread while");
+            GregorianCalendar now = new GregorianCalendar();
+            if (now.after(doNotUpTime)){
+                break;
+            }
+            logger.info("!!!! UpTimeThread -> run -> while");
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            try (InputStream inputStream = new URL("https://assistant-attendant.herokuapp.com/").openStream();
+            try (InputStream inputStream = new URL("https://assistant-for-duty.herokuapp.com/").openStream();
                  BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
 
                 logger.info("!!!! UpTimeThread -> run -> stream open");

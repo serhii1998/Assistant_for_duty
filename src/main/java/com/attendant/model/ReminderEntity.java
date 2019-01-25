@@ -8,7 +8,7 @@ public class ReminderEntity {
     private String chatId;
     private String numberRoom;
     private String dateDuty;
-    private boolean sendConfirmationCurDay;
-    private boolean sendConfirmationOneDay;
-    private boolean sendConfirmationTwoDay;
+    private boolean sendConfirmationToday;
+    private boolean sendConfirmationTomorrow;
+    private boolean sendConfirmationAfterTomorrow;
 }

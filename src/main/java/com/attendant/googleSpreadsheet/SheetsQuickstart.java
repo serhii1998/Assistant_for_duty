@@ -59,11 +59,11 @@ public class SheetsQuickstart {
      * Prints the names and majors of students in a sample spreadsheet:
      * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
      */
-    public static List<List<Object>> infoAttendantGoogleSpreadsheet() throws IOException, GeneralSecurityException {
+    public static List<List<Object>> infoAttendantGoogleSpreadsheet(final String range) throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         final String spreadsheetId = "1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ";
-        final String range = "Database!A2:S";
+        //final String range = "Database!A2:S";
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
