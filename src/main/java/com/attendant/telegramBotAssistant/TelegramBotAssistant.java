@@ -79,7 +79,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
                 deleteReminderFromChatId(chatId);
                 sendMsg(message, chatId);
                 break;
-            case "Напоминание установлено на":
+            case "Напоминание пока не установлено":
                 break;
             default:
                 logger.info("-!-!-!-!-!-!-!-!-!- onUpdateReceived -> default switch");
@@ -122,7 +122,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
                         setButtons(sendMessage, chatId);
                         execute(sendMessage.setText("Напоминание создано для комнаты " + room + ". Пока следующей даты дежурства нет. " +
                                 "Я буду уведомлять тебя о наступлении дежурства в течении 3-х дней перед " +
-                                "дежурством, включая день дежурства. Так же, я уведомлю тебя, когда в графике появится дата следующего дежурства." +
+                                "дежурством, включая день дежурства." +
                                 " Следи за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
 
                     } catch (Exception e) {
@@ -184,8 +184,8 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
             if (checkExistenceThisRoom && !checkCreateReminder) {
                 if (sendMessage.getText().trim().equals("")) {
                     logger.info("-!-!-!-!-!-!-!-!-!- sendMsgSearchDateDutyInGoogleSpreadsheet -> sendMessage.getText().trim().equals(\"\") = true + {}", sendMessage.toString());
-                    execute(sendMessage.setText("В графике пока нет даты следующего дежурства для комнаты " + room + ". Установите напоминание или " +
-                            " следите за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
+                    execute(sendMessage.setText("В графике пока нет даты следующего дежурства для комнаты " + room + ". Установи напоминание или " +
+                            " следи за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
                 } else {
                     logger.info("-!-!-!-!-!-!-!-!-!- sendMsgSearchDateDutyInGoogleSpreadsheet -> sendMessage.getText().trim().equals(\"\") = false + {}", sendMessage.toString());
                     execute(sendMessage);
