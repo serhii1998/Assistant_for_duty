@@ -317,7 +317,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "Assistant_for_duty";
+        return "!!!Дежурство!!!";
     }
 
     @Override
