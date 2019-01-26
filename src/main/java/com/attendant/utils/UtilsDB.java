@@ -300,7 +300,9 @@ public class UtilsDB {
                         PreparedStatement preparedStatement = connection.prepareStatement("select date_duty from reminder_for_duty where number_room = ?");
                         preparedStatement.setString(1, room);
                         ResultSet resultSet = preparedStatement.executeQuery();
-                        String dateDutyFromDB = resultSet.getString("date_duty");
+                        String dateDutyFromDB = "";
+                        if(resultSet.next()){
+                        dateDutyFromDB = resultSet.getString("date_duty");}
                         //дальше проверяем, устарела ли дата дежурства в гугл таблице.
                         if (!dateDuty.equals(dateDutyFromDB)){
                             logger.info("/////UtilsDB -> updateDutyDates -> room = {}, dateDuty = {}, dateDutyFromDB", room, dateDuty, dateDutyFromDB);

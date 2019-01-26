@@ -17,23 +17,26 @@ public class UpTimeThread implements Runnable {
 
     @Override
     public void run() {
-        GregorianCalendar doNotUpTimeAfter = new GregorianCalendar();
-        doNotUpTimeAfter.set(Calendar.HOUR_OF_DAY, 23);
-        doNotUpTimeAfter.set(Calendar.MINUTE, 35);
-        doNotUpTimeAfter.set(Calendar.SECOND, 0);
-
-        GregorianCalendar startUpTimeBefore = new GregorianCalendar();
-        startUpTimeBefore.add(Calendar.DAY_OF_MONTH, 1);
-        startUpTimeBefore.set(Calendar.HOUR_OF_DAY, 8);
-        startUpTimeBefore.set(Calendar.MINUTE, 0);
-        startUpTimeBefore.set(Calendar.SECOND, 0);
 
         while (true) {
+            GregorianCalendar doNotUpTimeAfter = new GregorianCalendar();
+            doNotUpTimeAfter.set(Calendar.HOUR_OF_DAY, 23);
+            doNotUpTimeAfter.set(Calendar.MINUTE, 35);
+            doNotUpTimeAfter.set(Calendar.SECOND, 0);
+
+            GregorianCalendar startUpTimeAfter = new GregorianCalendar();
+            startUpTimeAfter.add(Calendar.DAY_OF_MONTH, 1);
+            startUpTimeAfter.set(Calendar.HOUR_OF_DAY, 8);
+            startUpTimeAfter.set(Calendar.MINUTE, 0);
+            startUpTimeAfter.set(Calendar.SECOND, 0);
+
             GregorianCalendar now = new GregorianCalendar();
 
             if (now.after(doNotUpTimeAfter)) {
                 try {
-                    sleep(startUpTimeBefore.getTimeInMillis() - now.getTimeInMillis());
+                    long needSleep = startUpTimeAfter.getTimeInMillis() - now.getTimeInMillis();
+                    logger.info("!!!! UpTimeThread -> run -> sleep() == {}", needSleep);
+                    sleep(needSleep);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

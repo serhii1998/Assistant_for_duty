@@ -13,6 +13,7 @@ import java.util.*;
 public class ReminderThread extends Thread {
 
     private Logger logger = LoggerFactory.getLogger(ReminderThread.class);
+    private boolean todayDatabaseHasAlreadyBeenUpdated = false;
 
     public ReminderThread(String name) {
         super(name);
@@ -22,11 +23,14 @@ public class ReminderThread extends Thread {
     public void run() {
         while (true) {
 
-            updateOfDutyDatesInDB(); // обновляем базу данных
+            if (!todayDatabaseHasAlreadyBeenUpdated) {
+                updateOfDutyDatesInDB(); // обновляем базу данных
+                todayDatabaseHasAlreadyBeenUpdated = true;
+            }
 
-            long needSleepStream = canRunThreadOrNeedToWait();
-            logger.info("!!!!! ReminderThread -> run -> needSleepStream == {}", needSleepStream);
-            if (needSleepStream == 0) {
+            long needSleepStreamBeforeSendReminder = canRunSendReminderOrNeedToWait();
+            logger.info("!!!!! ReminderThread -> run -> needSleepStreamBeforeSendReminder == {}", needSleepStreamBeforeSendReminder);
+            if (needSleepStreamBeforeSendReminder == 0) {
                 try {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
                     GregorianCalendar gregorianCalendar = new GregorianCalendar();
@@ -54,7 +58,7 @@ public class ReminderThread extends Thread {
                     }
 
                     long sleepThreadBeforeTodayDuty = sleepThreadBeforeTodayDutyInWeekdays();
-                    if (dayOfWeek > 1 && dayOfWeek < 7 && sleepThreadBeforeTodayDuty > 0){
+                    if (dayOfWeek > 1 && dayOfWeek < 7 && sleepThreadBeforeTodayDuty > 0) {
                         logger.info("!!!!! ReminderThread ->  run -> sleepThreadBeforeTodayDutyInWeekdays() == {}", sleepThreadBeforeTodayDuty);
                         sleep(sleepThreadBeforeTodayDuty);
                         TelegramBotAssistant telegramBotAssistant = new TelegramBotAssistant();
@@ -63,6 +67,9 @@ public class ReminderThread extends Thread {
 
                     long sleepThreadUntilNextDay = sleepThreadUntilNextDay();
                     logger.info("!!!!! ReminderThread ->  run -> sleepThreadUntilNextDay() == {}", sleepThreadUntilNextDay);
+
+                    todayDatabaseHasAlreadyBeenUpdated = false; // говорим про то, что база данных не обновлена, что-бы на следующий день она опять обновилась
+
                     sleep(sleepThreadUntilNextDay);
 
                 } catch (InterruptedException e) {
@@ -72,8 +79,8 @@ public class ReminderThread extends Thread {
 
             } else {
                 try {
-                    logger.info("!!!!!  ReminderThread -> run -> else needSleepStream == {}", needSleepStream);
-                    sleep(needSleepStream);
+                    logger.info("!!!!!  ReminderThread -> run -> else needSleepStreamBeforeSendReminder == {}", needSleepStreamBeforeSendReminder);
+                    sleep(needSleepStreamBeforeSendReminder);
                 } catch (InterruptedException e) {
                     logger.warn("!!!!!  ReminderThread -> run -> InterruptedException");
                     e.printStackTrace();
@@ -109,14 +116,14 @@ public class ReminderThread extends Thread {
         }
     }
 
-    private long canRunThreadOrNeedToWait() {
+    private long canRunSendReminderOrNeedToWait() {
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         GregorianCalendar timeReminder = new GregorianCalendar();
         timeReminder.set(Calendar.HOUR_OF_DAY, 9);
         timeReminder.set(Calendar.MINUTE, 0);
         timeReminder.set(Calendar.SECOND, 0);
 
-        logger.info("canRunThreadOrNeedToWait() -> gregorianCalendar == {} \n timeReminder == {} \n gregorianCalendar.after(timeReminder) == {} \n timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis() == {}", gregorianCalendar.getTime(), timeReminder.getTime(), gregorianCalendar.after(timeReminder), timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis());
+        logger.info("canRunSendReminderOrNeedToWait() -> gregorianCalendar == {} \n timeReminder == {} \n gregorianCalendar.after(timeReminder) == {} \n timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis() == {}", gregorianCalendar.getTime(), timeReminder.getTime(), gregorianCalendar.after(timeReminder), timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis());
         if (gregorianCalendar.after(timeReminder)) {
             return 0;
         } else {
@@ -128,7 +135,7 @@ public class ReminderThread extends Thread {
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         GregorianCalendar timeReminder = new GregorianCalendar();
         timeReminder.add(Calendar.DAY_OF_MONTH, 1);//добавляем к сегодняшней дате 1 день
-        timeReminder.set(Calendar.HOUR_OF_DAY, 9);
+        timeReminder.set(Calendar.HOUR_OF_DAY, 8);
         timeReminder.set(Calendar.MINUTE, 0);
         timeReminder.set(Calendar.SECOND, 0);
 
