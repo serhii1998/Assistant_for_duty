@@ -7,22 +7,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
+
+import static com.attendant.utils.CommonUtils.todayBeforeOrEqualsThisDate;
 
 public class UtilsSpreadsheet {
 
     private static Logger logger = LoggerFactory.getLogger(UtilsSpreadsheet.class);
-
-    public static boolean todayBeforeOrEqualsThisDate(String dateDutyStr) throws ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-        Date today = format.parse(format.format(new Date()));
-        Date dateDuty = format.parse(dateDutyStr);
-
-//        logger.info("******** UtilsSpreadsheet -> todayBeforeOrEqualsThisDate == {}, dateDutyStr == {}, today == {}", today.getTime() - dateDuty.getTime() > 0, dateDuty, today);
-        return today.before(dateDuty) || today.equals(dateDuty);
-    }
 
     //возвращает true в случае, если искомая комната найдена
     public static boolean checkExistenceThisRoomAndSetDateDutyToSendMessage(String room, SendMessage sendMessage) {

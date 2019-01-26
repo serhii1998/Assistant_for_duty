@@ -22,6 +22,8 @@ public class ReminderThread extends Thread {
     public void run() {
         while (true) {
 
+            updateOfDutyDatesInDB(); // обновляем базу данных
+
             long needSleepStream = canRunThreadOrNeedToWait();
             logger.info("!!!!! ReminderThread -> run -> needSleepStream == {}", needSleepStream);
             if (needSleepStream == 0) {
@@ -50,8 +52,6 @@ public class ReminderThread extends Thread {
                         TelegramBotAssistant telegramBotAssistant = new TelegramBotAssistant();
                         telegramBotAssistant.sendReminder(mapReminders); // отправить напоминание
                     }
-
-                    updateOfDutyDatesInDB(); // обновляем базу данных
 
                     long sleepThreadBeforeTodayDuty = sleepThreadBeforeTodayDutyInWeekdays();
                     if (dayOfWeek > 1 && dayOfWeek < 7 && sleepThreadBeforeTodayDuty > 0){

@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
+import static com.attendant.utils.CommonUtils.todayBeforeOrEqualsThisDate;
+
 public class UtilsDB {
 
     private static Logger logger = LoggerFactory.getLogger(UtilsDB.class);
@@ -178,17 +180,17 @@ public class UtilsDB {
                 for (ReminderEntity r : entry.getValue()) {
                     switch (dayDuty) {
                         case 0:
-                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = true where chat_id = ?");
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = true,  send_confirmation_tomorrow = true,  send_confirmation_after_tomorrow = true where chat_id = ?");
                             preparedStatement.setString(1, r.getChatId());
                             preparedStatement.executeUpdate();
                             break;
                         case 1:
-                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_tomorrow = true where chat_id = ?");
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = false, send_confirmation_tomorrow = true, send_confirmation_after_tomorrow = true where chat_id = ?");
                             preparedStatement.setString(1, r.getChatId());
                             preparedStatement.executeUpdate();
                             break;
                         case 2:
-                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_after_tomorrow = true where chat_id = ?");
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = false, send_confirmation_tomorrow = false, send_confirmation_after_tomorrow = true where chat_id = ?");
                             preparedStatement.setString(1, r.getChatId());
                             preparedStatement.executeUpdate();
                             break;
@@ -281,7 +283,7 @@ public class UtilsDB {
     public static void updateDutyDates(List<List<Object>> valuesInGoogleSpreadsheet) {
         //key == room, values == dateDuty;
         HashMap<String, String> supportMap = new HashMap<>();// коллекция, в которую записываю комнаты и даты,
-        // чьи даты в БД уже были обновлены. это нужно для того, что бы не перезатереть старые даты дежурств новыми, которые написаны на месяц на 2 вперед
+        // чьи даты в БД уже были обновлены. это нужно для того, что бы не перезатереть старые даты дежурств новыми, которые написаны, на месяц на 2 вперед
 
         logger.info("/////UtilsDB -> updateDutyDates");
         try (Connection connection = dataConnection()) {
@@ -291,21 +293,25 @@ public class UtilsDB {
 
                     String dateDuty = row.get(i + 1).toString().trim();
                     String room = row.get(i).toString().trim();
-                    if (!room.equals("") && !dateDuty.equals("") && UtilsSpreadsheet.todayBeforeOrEqualsThisDate(dateDuty) && supportMap.get(room) == null) {
+                    if (!room.equals("") && !dateDuty.equals("") && todayBeforeOrEqualsThisDate(dateDuty) && supportMap.get(room) == null) {
+                        //зайти сюда только в том случае, если ячейка в гугл таблице не пустая, если дата дежурства в гугл таблице находится после сегодняшнего дня (если дата дежурства еще не прошла)
+                        // и если для этой комнаты еще небыло обновлений в дате
 
-                        ArrayList<Boolean> listConfirmation = new ArrayList<>();
-                        checkSendConfirmation(listConfirmation, dateDuty);// модифицируем лист подтверждений об оповещении дежурства
+                        PreparedStatement preparedStatement = connection.prepareStatement("select date_duty from reminder_for_duty where number_room = ?");
+                        preparedStatement.setString(1, room);
+                        ResultSet resultSet = preparedStatement.executeQuery();
+                        String dateDutyFromDB = resultSet.getString("date_duty");
+                        //дальше проверяем, устарела ли дата дежурства в гугл таблице.
+                        if (!dateDuty.equals(dateDutyFromDB)){
+                            logger.info("/////UtilsDB -> updateDutyDates -> room = {}, dateDuty = {}, dateDutyFromDB", room, dateDuty, dateDutyFromDB);
+                            //если устарела, то обновим дату дежурства
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set date_duty = ? where number_room = ?");
+                            preparedStatement.setString(1, dateDuty);
+                            preparedStatement.setString(2, room);
+                            preparedStatement.executeUpdate();
 
-                        logger.info("/////UtilsDB -> updateDutyDates -> room = {}, dateDuty = {}", room, dateDuty);
-
-                        PreparedStatement preparedStatement = connection.prepareStatement("update reminder_for_duty set date_duty = ?, send_confirmation_today = ?, send_confirmation_tomorrow = ?, send_confirmation_after_tomorrow = ? where number_room = ?");
-                        preparedStatement.setString(1, dateDuty);
-                        preparedStatement.setBoolean(2, listConfirmation.get(0));
-                        preparedStatement.setBoolean(3, listConfirmation.get(1));
-                        preparedStatement.setBoolean(4, listConfirmation.get(2));
-                        preparedStatement.setString(5, room);
-                        preparedStatement.executeUpdate();
-
+                        }
+                        // ну и вконце обозначим, что для этой даты обновление уже произошло в раннем времени.
                         supportMap.put(room, dateDuty);
                     }
                 }
