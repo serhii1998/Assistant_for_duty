@@ -30,16 +30,19 @@ public class UpTimeThread implements Runnable {
             startUpTimeAfter.set(Calendar.MINUTE, 0);
             startUpTimeAfter.set(Calendar.SECOND, 0);
 
+            GregorianCalendar todayStartUpTimeAfter = new GregorianCalendar();
+            startUpTimeAfter.set(Calendar.HOUR_OF_DAY, 8);
+            startUpTimeAfter.set(Calendar.MINUTE, 0);
+            startUpTimeAfter.set(Calendar.SECOND, 0);
+
             GregorianCalendar now = new GregorianCalendar();
 
             if (now.after(doNotUpTimeAfter)) {
-                try {
-                    long needSleep = startUpTimeAfter.getTimeInMillis() - now.getTimeInMillis();
-                    logger.info("!!!! UpTimeThread -> run -> sleep() == {}", needSleep);
-                    sleep(needSleep);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                sleepUpTimeThread(startUpTimeAfter, now);
+            }
+
+            if (now.before(todayStartUpTimeAfter)){
+                sleepUpTimeThread(todayStartUpTimeAfter, now);
             }
 
 
@@ -54,6 +57,16 @@ public class UpTimeThread implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void sleepUpTimeThread(GregorianCalendar startUpTimeAfter, GregorianCalendar now) {
+        try {
+            long needSleep = startUpTimeAfter.getTimeInMillis() - now.getTimeInMillis();
+            logger.info("!!!! UpTimeThread -> run -> sleep() == {}", needSleep);
+            sleep(needSleep);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -1,1 +1,1 @@
-web: java -jar target/assistantAttendant-1.0.jar
+web: java -jar target/assistant_for_duty-1.0.jar
