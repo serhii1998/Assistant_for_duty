@@ -31,16 +31,17 @@ public class UpTimeThread implements Runnable {
             startUpTimeAfter.set(Calendar.SECOND, 0);
 
             GregorianCalendar todayStartUpTimeAfter = new GregorianCalendar();
-            startUpTimeAfter.set(Calendar.HOUR_OF_DAY, 8);
-            startUpTimeAfter.set(Calendar.MINUTE, 0);
-            startUpTimeAfter.set(Calendar.SECOND, 0);
+            todayStartUpTimeAfter.set(Calendar.HOUR_OF_DAY, 8);
+            todayStartUpTimeAfter.set(Calendar.MINUTE, 0);
+            todayStartUpTimeAfter.set(Calendar.SECOND, 0);
 
             GregorianCalendar now = new GregorianCalendar();
 
+            logger.info("!!!! UpTimeThread -> run -> now.after(doNotUpTimeAfter) == {}, now == {}, startUpTimeAfter == {}", now.after(doNotUpTimeAfter), now.getTime(), startUpTimeAfter.getTime());
             if (now.after(doNotUpTimeAfter)) {
                 sleepUpTimeThread(startUpTimeAfter, now);
             }
-
+            logger.info("!!!! UpTimeThread -> run -> now.before(todayStartUpTimeAfter) == {}, now == {}, todayStartUpTimeAfter == {}", now.before(todayStartUpTimeAfter), now.getTime(), todayStartUpTimeAfter.getTime());
             if (now.before(todayStartUpTimeAfter)){
                 sleepUpTimeThread(todayStartUpTimeAfter, now);
             }
