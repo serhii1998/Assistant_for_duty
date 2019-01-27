@@ -1,0 +1,15 @@
+create table if not exists reminder_for_duty
+(
+	chat_id varchar(50) not null,
+	number_room varchar(4) not null,
+	date_duty varchar(20),
+	send_confirmation_after_tomorrow boolean not null,
+	send_confirmation_tomorrow boolean not null,
+	send_confirmation_today boolean not null
+)
+;
+
+create unique index if not exists duty_reminder_chat_id_uindex
+	on reminder_for_duty (chat_id)
+;
+
