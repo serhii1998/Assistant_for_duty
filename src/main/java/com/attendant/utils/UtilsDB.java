@@ -139,6 +139,7 @@ public class UtilsDB {
 
     // метод, который получает из базы созданное напоминание по переданной дате
     public synchronized static List<ReminderEntity> getReminderGivenDate(String dateDuty) {
+        logger.info("////// UtilsDB ->  getReminderGivenDate ->  dateDuty == {}", "/"+dateDuty+"/");
         ArrayList<ReminderEntity> reminders = new ArrayList<>();
 
         try (Connection connection = dataConnection()) {
