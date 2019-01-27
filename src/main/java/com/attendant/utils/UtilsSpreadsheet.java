@@ -21,7 +21,7 @@ public class UtilsSpreadsheet {
         boolean existenceThisRoom = false; // флаг существования комнаты в гугл таблице.
         // Если ее там в гугл таблицах нет, то ее не нужно записывать в БД
 
-        List<List<Object>> values = null;
+        List<List<Object>> values;
         try {
 
             values = SheetsQuickstart.infoAttendantGoogleSpreadsheet("Database!A3:S"); // получаем заданную страницу в виде вдумерного массива
