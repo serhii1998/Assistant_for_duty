@@ -58,40 +58,4 @@ public class UtilsSpreadsheet {
         logger.info("******** UtilsSpreadsheet -> checkExistenceThisRoomAndSetDateDutyToSendMessage -> \n sendMessage.getText() == {}, existenceThisRoom == {}", sendMessage.getText(), existenceThisRoom);
         return existenceThisRoom;
     }
-
-    // метод, который сетит даты дежурств тем людям, у которых их небыло, или они уже подежурили. достаем из базы людей без дежурств и ищем в гугл доках, появились ли даты. добавляю в коллекцию и возвращаю тех, кому добавились даты
-//    public static List<ReminderEntity> setDatesOfDutyToThoseRoomsThatDidNotHave(List<ReminderEntity> entityList) {
-//        List<List<Object>> values = null;
-//        ArrayList<ReminderEntity> entityHaveAddedDatesDuty = new ArrayList<>();
-//        try {
-//            values = SheetsQuickstart.infoAttendantGoogleSpreadsheet("Database!A3:S"); // получаем заданную страницу в виде двумерного массива
-//            if (values != null) {
-//                for (List row : values) { // получаем все данные из гугл таблиц
-//                    for (int i = 1; i < row.size(); i += 2) { // выбираем их по строкам. берем с 1 ячейки, там идет комната. рядом дата.
-//
-//                        String room = row.get(i).toString().trim();
-//                        String dateDuty = row.get(i + 1).toString().trim();// вот и дата, которая рядом с комнатой
-//
-//                        if (!dateDuty.equals("") && todayBeforeOrEqualsThisDate(dateDuty)) { // ищем напоминание в том случае, если дата не прошла дату дежурсива
-//                            Iterator<ReminderEntity> iterator = entityList.iterator();
-//                            while (iterator.hasNext()) {
-//                                ReminderEntity r = iterator.next();
-//                                if (room.equals(r.getNumberRoom())) {// если комната равна комнате в напоминании, то добавить в напомининие дату,
-//                                    // добавить напоминание в выходную коллекцию. удалить напоминание, что бі больше не возвращаться к нему
-//                                    r.setDateDuty(dateDuty);
-//                                    entityHaveAddedDatesDuty.add(r);
-//                                    iterator.remove();
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            logger.warn("******** UtilsSpreadsheet -> setDatesOfDutyToThoseRoomsThatDidNotHave -> Exception values");
-//            e.printStackTrace();
-//        }
-//        logger.info("******** UtilsSpreadsheet -> setDatesOfDutyToThoseRoomsThatDidNotHave -> entityHaveAddedDatesDuty == {}", entityHaveAddedDatesDuty.toString());
-//        return entityHaveAddedDatesDuty;
-//    }
 }

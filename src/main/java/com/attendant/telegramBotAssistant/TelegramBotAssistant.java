@@ -286,23 +286,6 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
 
         setStatusSendingReminder(mapReminders);
     }
-//    // отослать уведомление, что найдена новая дата дежурства
-//
-//    public synchronized void sendMsgUpdateDateDutyFromReminderEntities(ArrayList<ReminderEntity> updatedReminders) {
-//        logger.info("-!-!-!-!-!-!-!-!-!- TelegramBotAssistant -> sendMsgUpdateDateDutyFromReminderEntities -> updatedReminders == {}", updatedReminders);
-//        SendMessage sendMessage = new SendMessage();
-//        for (ReminderEntity r : updatedReminders) {
-//            setButtons(sendMessage, r.getChatId());
-//            sendMessage.enableMarkdown(true);
-//            sendMessage.setChatId(r.getChatId());
-//            sendMessage.setText("Опа! Появилась новая дата дежурства для комнаты " + r.getNumberRoom() + ", она дежурная " + r.getDateDuty() + " числа. Я оповещу тебя о дежурстве за 2 дня. Удачного дня)");
-//            try {
-//                execute(sendMessage);
-//            } catch (TelegramApiException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 
     public void sendReminderIn1600(String today) {
 

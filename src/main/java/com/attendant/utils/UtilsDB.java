@@ -27,16 +27,6 @@ public class UtilsDB {
         return connection;
     }
 
-    // человек делает напоминание в день днжурства. нужно все выставить в true
-    // человек делает напоминание за день до дежурства. завтра и послезавтра делаю в true, а сегодня в false
-    // человек делает напоминание за 2 дня до дежурства. послезавтра делаю в true, а сегодня и завтра в false
-    // человек делает напоминание больше чем за 2 дня до дежурства. делаю все переменные в false
-    //dateDuty; дата дежурства
-    //если дата дежурства равна сегодняшней, то установить все даты в true
-    //если дата дежурства равна завтрашней, установить сегодня в false, осталоное в true
-    //если дата дежурства равна послезавтрашней, установить сегодня и завтра в false, после-завтра в true
-    //иначе все в false
-
     //поринимает в себя список из 3 булевих переменных, проверяет прошла ли дата дежурства и сетит соответствующие флаги
     private synchronized static List<Boolean> checkSendConfirmation(List<Boolean> confirmations, String strDateDuty) {
         try {
@@ -54,9 +44,6 @@ public class UtilsDB {
             GCTwoDay.add(Calendar.DAY_OF_MONTH, 2); // послезавтра
             Date afterTomorrow = format.parse(format.format(GCTwoDay.getTime()));
 
-//                logger.warn("///// dateDuty.equals(today) == {}, dateDuty == {}, today == {}", dateDuty.equals(today), dateDuty, today);
-//                logger.warn("///// dateDuty.equals(tomorrow) == {}, dateDuty == {}, tomorrow == {}", dateDuty.equals(tomorrow), dateDuty, tomorrow);
-//                logger.warn("///// dateDuty.equals(afterTomorrow) == {}, dateDuty == {}, afterTomorrow == {}", dateDuty.equals(afterTomorrow), dateDuty, afterTomorrow);
             if (dateDuty.equals(today)) {
                 confirmations.add(0, true);
                 confirmations.add(1, true);
@@ -86,10 +73,6 @@ public class UtilsDB {
     public synchronized static void saveReminderInDB(String chatId, String room, String strDateDuty) {
         logger.info("////// UtilsDB -> saveReminderInDB -> chatId == {}, room == {}, strDateDuty == {}, strDateDuty.equals(\"\") == {}", chatId, room, strDateDuty, strDateDuty.equals(""));
         try (Connection connection = dataConnection()) {
-
-//            boolean sendConfirmationToday = false;
-//            boolean sendConfirmationTomorrow = false;
-//            boolean sendConfirmationAfterTomorrow = false;
 
             ArrayList<Boolean> confirmations = new ArrayList<>();
             confirmations.add(0, false); // сегодня
@@ -236,51 +219,6 @@ public class UtilsDB {
         }
     }
 
-    // этот метод сначала чистит базу данных на лицо просроченых дат а потом возвращает напоминания без дат
-//    public synchronized static List<ReminderEntity> getReminderEntityWhoDidNotHaveDateDuty() {
-//        List<ReminderEntity> entityList = new ArrayList<>();
-//        try (Connection connection = dataConnection()) {
-//
-//            checkOfOverdueDatesDuty(connection);// модифицируем базу данных, что бы понять, у кого уже просрочено дежурство
-//
-//            PreparedStatement preparedStatement = connection.prepareStatement("select chat_id, number_room from reminder_for_duty where date_duty = ''");
-//            ResultSet resultSet = preparedStatement.executeQuery();
-//            while (resultSet.next()) {
-//                ReminderEntity reminderEntity = new ReminderEntity();
-//                reminderEntity.setChatId(resultSet.getString("chat_id"));
-//                reminderEntity.setNumberRoom(resultSet.getString("number_room"));
-//                entityList.add(reminderEntity);
-//            }
-//        } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
-//        }
-//        logger.info("/////UtilsDB -> getReminderEntityWhoDidNotHaveDateDuty() -> entityList == {}", entityList.toString());
-//        return entityList;
-//    }
-
-//    // проверяем просроченые дежурства
-//    private static void checkOfOverdueDatesDuty(Connection connection) {
-//        logger.info("/////UtilsDB -> checkOfOverdueDatesDuty");
-//        try {
-//            PreparedStatement preparedStatement = connection.prepareStatement("select chat_id, date_duty from reminder_for_duty");
-//            ResultSet resultSet = preparedStatement.executeQuery();
-//            while (resultSet.next()) {
-//                String chatId = resultSet.getString("chat_id");
-//                String dateDuty = resultSet.getString("date_duty");
-//
-//                if (!dateDuty.equals("") && !UtilsSpreadsheet.todayBeforeOrEqualsThisDate(dateDuty.trim())) {
-//                    preparedStatement = connection.prepareStatement("update reminder_for_duty set date_duty = '' where chat_id = ?");
-//                    preparedStatement.setString(1, chatId);
-//                    preparedStatement.executeUpdate();
-//                }
-//            }
-//
-//        } catch (SQLException | ParseException e) {
-//            logger.warn("/////UtilsDB -> checkOfOverdueDatesDuty -> CATCH");
-//            e.printStackTrace();
-//        }
-//    }
-
     public static void updateDutyDates(List<List<Object>> valuesInGoogleSpreadsheet) {
         //key == room, values == dateDuty;
         HashMap<String, String> supportMap = new HashMap<>();// коллекция, в которую записываю комнаты и даты,
@@ -324,31 +262,4 @@ public class UtilsDB {
             e.printStackTrace();
         }
     }
-
-
-    // обновляем даты дежурств тех людей, у которых появились новые даты в гугл таблицах
-//    public static void updateDateDutyFromReminderEntitys(ArrayList<ReminderEntity> updatedReminders) {
-//        logger.info("/////UtilsDB -> updateDateDutyFromReminderEntitys -> updatedReminders == {}", updatedReminders);
-//        try (Connection connection = dataConnection()) {
-//            for (ReminderEntity r: updatedReminders) {
-//
-//                ArrayList<Boolean> confirmation = new ArrayList<>(Arrays.asList(false,false,false));
-//                confirmation = new ArrayList<>(checkSendConfirmation(confirmation, r.getDateDuty()));
-//
-//                PreparedStatement preparedStatement = connection.prepareStatement("update reminder_for_duty set number_room = ?, date_duty = ? ,send_confirmation_today = ?, send_confirmation_tomorrow = ?, send_confirmation_after_tomorrow = ? where chat_id = ?");
-//                preparedStatement.setString(1, r.getNumberRoom());
-//                preparedStatement.setString(2, r.getDateDuty());
-//                preparedStatement.setBoolean(3, confirmation.get(0));
-//                preparedStatement.setBoolean(4, confirmation.get(1));
-//                preparedStatement.setBoolean(5, confirmation.get(2));
-//                preparedStatement.setString(6, r.getChatId());
-//
-//                preparedStatement.executeUpdate();
-//            }
-//
-//        } catch (Exception e) {
-//            logger.warn("/////UtilsDB -> updateDateDutyFromReminderEntitys -> CATCH");
-//            e.printStackTrace();
-//        }
-//    }
 }
