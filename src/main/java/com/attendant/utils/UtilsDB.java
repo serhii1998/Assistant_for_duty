@@ -16,9 +16,9 @@ public class UtilsDB {
 
     private static Logger logger = LoggerFactory.getLogger(UtilsDB.class);
 
-    private static final String USERNAME = "npuzgpmqumbnlt";
-    private static final String PASSWORD = "07cf879928c6163797018e61397b2ecdbdfe2b6731ad51ac64d613b039c74d13";
-    private static final String URL = "jdbc:postgresql://ec2-79-125-4-96.eu-west-1.compute.amazonaws.com:5432/de2b5g3itjb4ku";
+    private static final String USERNAME = "mgtbaprvcbyypo";
+    private static final String PASSWORD = "ef60d37ff45a3acdc45bcf9cbb12f48cd72c42598ce69dafb83a4e03b59dc7e5";
+    private static final String URL = "jdbc:postgresql://ec2-46-137-121-216.eu-west-1.compute.amazonaws.com:5432/dcueq2i18kqeuu";
 
     public static Connection dataConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
