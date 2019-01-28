@@ -90,16 +90,17 @@ public class ReminderThread extends Thread {
     }
 
     private long sleepThreadBeforeTodayDutyInWeekdays() {
-        GregorianCalendar today = new GregorianCalendar();
-        long todayInMillis = today.getTimeInMillis();
-        int dayOfWeek = today.get(Calendar.DAY_OF_WEEK);
-        if (dayOfWeek < 7 && dayOfWeek > 1) {// если это суббота или воскресене
-            today.set(Calendar.HOUR_OF_DAY, 16);
-            today.set(Calendar.MINUTE, 0);
-            today.set(Calendar.SECOND, 0);
-            return today.getTimeInMillis() - todayInMillis;
+        GregorianCalendar todayStartDuty1600 = new GregorianCalendar();
+        long todayInMillis = todayStartDuty1600.getTimeInMillis();
+        int dayOfWeek = todayStartDuty1600.get(Calendar.DAY_OF_WEEK);
+        if (dayOfWeek < 7 && dayOfWeek > 1) {// если это будни дни
+            todayStartDuty1600.set(Calendar.HOUR_OF_DAY, 16);
+            todayStartDuty1600.set(Calendar.MINUTE, 0);
+            todayStartDuty1600.set(Calendar.SECOND, 0);
+            logger.info("!!!!! ReminderThread ->  sleepThreadBeforeTodayDutyInWeekdays() -> todayStartDuty1600.getTimeInMillis() - todayInMillis == {}", todayStartDuty1600.getTimeInMillis() - todayInMillis);
+            return todayStartDuty1600.getTimeInMillis() - todayInMillis;
         } else {
-            return 0;
+            return -1;
         }
     }
 
@@ -123,7 +124,7 @@ public class ReminderThread extends Thread {
         timeReminder.set(Calendar.MINUTE, 0);
         timeReminder.set(Calendar.SECOND, 0);
 
-        logger.info("canRunSendReminderOrNeedToWait() -> gregorianCalendar == {} \n timeReminder == {} \n gregorianCalendar.after(timeReminder) == {} \n timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis() == {}", gregorianCalendar.getTime(), timeReminder.getTime(), gregorianCalendar.after(timeReminder), timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis());
+        logger.info("!!!!! ReminderThread -> canRunSendReminderOrNeedToWait() -> gregorianCalendar == {} \n timeReminder == {} \n gregorianCalendar.after(timeReminder) == {} \n timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis() == {}", gregorianCalendar.getTime(), timeReminder.getTime(), gregorianCalendar.after(timeReminder), timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis());
         if (gregorianCalendar.after(timeReminder)) {
             return 0;
         } else {
@@ -139,7 +140,7 @@ public class ReminderThread extends Thread {
         timeReminder.set(Calendar.MINUTE, 0);
         timeReminder.set(Calendar.SECOND, 0);
 
-        logger.info("sleepThreadUntilNextDay() -> timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis() == {}", timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis());
+        logger.info("!!!!! ReminderThread -> sleepThreadUntilNextDay() -> timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis() == {}", timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis());
         return timeReminder.getTimeInMillis() - gregorianCalendar.getTimeInMillis();
     }
 }
