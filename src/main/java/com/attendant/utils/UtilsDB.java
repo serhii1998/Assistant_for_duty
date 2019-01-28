@@ -246,7 +246,7 @@ public class UtilsDB {
                         if (!dateDuty.equals(dateDutyFromDB)){
                             logger.info("/////UtilsDB -> updateDutyDates -> room = {}, dateDuty = {}, dateDutyFromDB", room, dateDuty, dateDutyFromDB);
                             //если устарела, то обновим дату дежурства
-                            preparedStatement = connection.prepareStatement("update reminder_for_duty set date_duty = ? where number_room = ?");
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set date_duty = ?, send_confirmation_today = false, send_confirmation_tomorrow = false, send_confirmation_after_tomorrow = false where number_room = ?");
                             preparedStatement.setString(1, dateDuty);
                             preparedStatement.setString(2, room);
                             preparedStatement.executeUpdate();
