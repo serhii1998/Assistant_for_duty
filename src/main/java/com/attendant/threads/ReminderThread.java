@@ -58,7 +58,7 @@ public class ReminderThread extends Thread {
                     }
 
                     long sleepThreadBeforeTodayDuty = sleepThreadBeforeTodayDutyInWeekdays();
-                    if (dayOfWeek > 1 && dayOfWeek < 7 && sleepThreadBeforeTodayDuty > 0) {
+                    if (dayOfWeek > 1 && dayOfWeek < 7) {
                         logger.info("!!!!! ReminderThread ->  run -> sleepThreadBeforeTodayDutyInWeekdays() == {}", sleepThreadBeforeTodayDuty);
                         sleep(sleepThreadBeforeTodayDuty);
                         TelegramBotAssistant telegramBotAssistant = new TelegramBotAssistant();
@@ -89,24 +89,25 @@ public class ReminderThread extends Thread {
         }
     }
 
-    private long sleepThreadBeforeTodayDutyInWeekdays() {
+    private long sleepThreadBeforeTodayDutyInWeekdays() {// візівать при условии, если точноо будень день
+        GregorianCalendar now = new GregorianCalendar();
+
         GregorianCalendar todayStartDuty1600 = new GregorianCalendar();
-        long todayInMillis = todayStartDuty1600.getTimeInMillis();
-        int dayOfWeek = todayStartDuty1600.get(Calendar.DAY_OF_WEEK);
-        if (dayOfWeek < 7 && dayOfWeek > 1) {// если это будни дни
-            todayStartDuty1600.set(Calendar.HOUR_OF_DAY, 16);
-            todayStartDuty1600.set(Calendar.MINUTE, 0);
-            todayStartDuty1600.set(Calendar.SECOND, 0);
-            logger.info("!!!!! ReminderThread ->  sleepThreadBeforeTodayDutyInWeekdays() -> todayStartDuty1600.getTimeInMillis() - todayInMillis == {}", todayStartDuty1600.getTimeInMillis() - todayInMillis);
-            return todayStartDuty1600.getTimeInMillis() - todayInMillis;
-        } else {
-            return -1;
+        todayStartDuty1600.set(Calendar.HOUR_OF_DAY, 16);
+        todayStartDuty1600.set(Calendar.MINUTE, 0);
+        todayStartDuty1600.set(Calendar.SECOND, 0);
+
+        logger.info("!!!!! ReminderThread ->  sleepThreadBeforeTodayDutyInWeekdays() -> todayStartDuty1600.getTimeInMillis() - now.getTimeInMillis() == {}", todayStartDuty1600.getTimeInMillis() - now.getTimeInMillis());
+
+        if (now.before(todayStartDuty1600)) {
+            return todayStartDuty1600.getTimeInMillis() - now.getTimeInMillis();
+        }else {
+            return 0;
         }
     }
 
     private synchronized void updateOfDutyDatesInDB() {
         try {
-
             logger.info("!!!!! ReminderThread -> updateOfDutyDatesInDB()");
             List<List<Object>> valuesInGoogleSpreadsheet = SheetsQuickstart.infoAttendantGoogleSpreadsheet("Database!A3:S");
             UtilsDB.updateDutyDates(valuesInGoogleSpreadsheet);

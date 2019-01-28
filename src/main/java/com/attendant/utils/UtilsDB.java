@@ -140,6 +140,7 @@ public class UtilsDB {
                 reminderEntity.setSendConfirmationToday(resultSet.getBoolean("send_confirmation_today"));
                 reminderEntity.setSendConfirmationTomorrow(resultSet.getBoolean("send_confirmation_tomorrow"));
                 reminderEntity.setSendConfirmationAfterTomorrow(resultSet.getBoolean("send_confirmation_after_tomorrow"));
+                reminderEntity.setSendConfirmationTodayIn1600(resultSet.getBoolean("send_confirmation_today_duty_in_1600"));
 
                 reminders.add(reminderEntity);
             }

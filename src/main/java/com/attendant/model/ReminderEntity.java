@@ -11,4 +11,5 @@ public class ReminderEntity {
     private boolean sendConfirmationToday;
     private boolean sendConfirmationTomorrow;
     private boolean sendConfirmationAfterTomorrow;
+    private boolean sendConfirmationTodayIn1600;
 }

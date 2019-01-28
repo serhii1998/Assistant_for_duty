@@ -288,14 +288,15 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
     }
 
     public void sendReminderIn1600(String today) {
-
         String message = "Не забывай, дежурство в 17:00. Хорошего вечера :)";
         ArrayList<ReminderEntity> reminders = new ArrayList<>(UtilsDB.getReminderGivenDate(today));
 
         for (ReminderEntity r : reminders) {
-            sendMsg(message, r.getChatId());
+            if (!r.isSendConfirmationTodayIn1600()) {
+                logger.info("-!-!-!-!-!-!-!-!-!- sendReminderIn1600 -> !r.isSendConfirmationTodayIn1600() == false, today == {}", today);
+                sendMsg(message, r.getChatId());
+            }
         }
-
     }
 
     @Override
