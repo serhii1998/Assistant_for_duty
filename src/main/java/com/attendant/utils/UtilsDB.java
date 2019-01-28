@@ -122,7 +122,7 @@ public class UtilsDB {
 
     // метод, который получает из базы созданное напоминание по переданной дате
     public synchronized static List<ReminderEntity> getReminderGivenDate(String dateDuty) {
-        logger.info("////// UtilsDB ->  getReminderGivenDate ->  dateDuty == {}", "/"+dateDuty+"/");
+        logger.info("////// UtilsDB ->  getReminderGivenDate ->  dateDuty == {}", "/" + dateDuty + "/");
         ArrayList<ReminderEntity> reminders = new ArrayList<>();
 
         try (Connection connection = dataConnection()) {
@@ -240,11 +240,13 @@ public class UtilsDB {
                         preparedStatement.setString(1, room);
                         ResultSet resultSet = preparedStatement.executeQuery();
                         String dateDutyFromDB = "";
-                        if(resultSet.next()){
-                        dateDutyFromDB = resultSet.getString("date_duty");}
-                        //дальше проверяем, устарела ли дата дежурства в гугл таблице.
-                        if (!dateDuty.equals(dateDutyFromDB)){
-                            logger.info("/////UtilsDB -> updateDutyDates -> room = {}, dateDuty = {}, dateDutyFromDB", room, dateDuty, dateDutyFromDB);
+                        if (resultSet.next()) {
+                            dateDutyFromDB = resultSet.getString("date_duty");
+                        }
+                        //дальше проверяем, устарела ли дата дежурства в гугл таблице и существует там она вообще.
+//                        logger.info("/////UtilsDB -> updateDutyDates -> !dateDuty.equals(dateDutyFromDB) == {}, !dateDutyFromDB.equals(\"\") == {}", !dateDuty.equals(dateDutyFromDB), !dateDutyFromDB.equals(""));
+                        if (!dateDuty.equals(dateDutyFromDB) && !dateDutyFromDB.equals("")) {
+                            logger.info("/////UtilsDB -> updateDutyDates -> room = {}, dateDuty = {}, dateDutyFromDB == {}", room, dateDuty, dateDutyFromDB);
                             //если устарела, то обновим дату дежурства
                             preparedStatement = connection.prepareStatement("update reminder_for_duty set date_duty = ?, send_confirmation_today = false, send_confirmation_tomorrow = false, send_confirmation_after_tomorrow = false where number_room = ?");
                             preparedStatement.setString(1, dateDuty);
