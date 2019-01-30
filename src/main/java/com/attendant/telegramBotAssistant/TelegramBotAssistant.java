@@ -297,6 +297,8 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
                 sendMsg(message, r.getChatId());
             }
         }
+
+        setStatusSendingReminder(reminders);
     }
 
     @Override

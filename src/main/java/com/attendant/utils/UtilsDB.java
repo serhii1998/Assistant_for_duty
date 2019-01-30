@@ -20,7 +20,7 @@ public class UtilsDB {
     private static final String PASSWORD = "ef60d37ff45a3acdc45bcf9cbb12f48cd72c42598ce69dafb83a4e03b59dc7e5";
     private static final String URL = "jdbc:postgresql://ec2-46-137-121-216.eu-west-1.compute.amazonaws.com:5432/dcueq2i18kqeuu";
 
-    public static Connection dataConnection() throws ClassNotFoundException, SQLException {
+    private static Connection dataConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
         Connection connection = DriverManager.getConnection(
                 URL, USERNAME, PASSWORD);
@@ -159,23 +159,23 @@ public class UtilsDB {
         logger.info("///// UtilsDB -> setStatusSendingReminder -> mapReminders == {}", mapReminders.toString());
 
         try (Connection connection = dataConnection()) {
-            PreparedStatement preparedStatement = null;
+            PreparedStatement preparedStatement;
             for (Map.Entry<Integer, ArrayList<ReminderEntity>> entry : mapReminders.entrySet()) {
                 int dayDuty = entry.getKey(); // 0 - сегодня, 1 - завтра, 2 - послезавтра
                 for (ReminderEntity r : entry.getValue()) {
                     switch (dayDuty) {
                         case 0:
-                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = true,  send_confirmation_tomorrow = true,  send_confirmation_after_tomorrow = true where chat_id = ?");
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = true,  send_confirmation_tomorrow = true,  send_confirmation_after_tomorrow = true, send_confirmation_today_duty_in_1600 = false where chat_id = ?");
                             preparedStatement.setString(1, r.getChatId());
                             preparedStatement.executeUpdate();
                             break;
                         case 1:
-                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = false, send_confirmation_tomorrow = true, send_confirmation_after_tomorrow = true where chat_id = ?");
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = false, send_confirmation_tomorrow = true, send_confirmation_after_tomorrow = true, send_confirmation_today_duty_in_1600 = false where chat_id = ?");
                             preparedStatement.setString(1, r.getChatId());
                             preparedStatement.executeUpdate();
                             break;
                         case 2:
-                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = false, send_confirmation_tomorrow = false, send_confirmation_after_tomorrow = true where chat_id = ?");
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today = false, send_confirmation_tomorrow = false, send_confirmation_after_tomorrow = true, send_confirmation_today_duty_in_1600 = false where chat_id = ?");
                             preparedStatement.setString(1, r.getChatId());
                             preparedStatement.executeUpdate();
                             break;
@@ -185,6 +185,21 @@ public class UtilsDB {
 
         } catch (Exception e) {
             logger.warn("///// UtilsDB -> setStatusSendingReminder -> Exception ");
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized static void setStatusSendingReminder(ArrayList<ReminderEntity> reminders) {
+        logger.info("///// UtilsDB -> setStatusSendingReminder(ArrayList<ReminderEntity> reminders) -> reminders == {}", reminders);
+        try(Connection connection = dataConnection()) {
+            PreparedStatement preparedStatement;
+            for (ReminderEntity r : reminders) {
+                preparedStatement = connection.prepareStatement("update reminder_for_duty set send_confirmation_today_duty_in_1600 = true where chat_id = ?");
+                preparedStatement.setString(1, r.getChatId());
+                preparedStatement.executeUpdate();
+            }
+        }catch (Exception e){
+            logger.warn("///// UtilsDB -> setStatusSendingReminder(ArrayList<ReminderEntity> reminders) -> Exception ");
             e.printStackTrace();
         }
     }
@@ -249,7 +264,7 @@ public class UtilsDB {
                         if (!dateDuty.equals(dateDutyFromDB) && !dateDutyFromDB.equals("")) {
                             logger.info("/////UtilsDB -> updateDutyDates -> room = {}, dateDuty = {}, dateDutyFromDB == {}", room, dateDuty, dateDutyFromDB);
                             //если устарела, то обновим дату дежурства
-                            preparedStatement = connection.prepareStatement("update reminder_for_duty set date_duty = ?, send_confirmation_today = false, send_confirmation_tomorrow = false, send_confirmation_after_tomorrow = false where number_room = ?");
+                            preparedStatement = connection.prepareStatement("update reminder_for_duty set date_duty = ?, send_confirmation_today = false, send_confirmation_tomorrow = false, send_confirmation_after_tomorrow = false, send_confirmation_today_duty_in_1600 = false where number_room = ?");
                             preparedStatement.setString(1, dateDuty);
                             preparedStatement.setString(2, room);
                             preparedStatement.executeUpdate();
