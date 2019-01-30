@@ -58,9 +58,10 @@ public class ReminderThread extends Thread {
                     }
 
                     long sleepThreadBeforeTodayDuty = sleepThreadBeforeTodayDutyInWeekdays();
-                    if (dayOfWeek > 1 && dayOfWeek < 7) {
+                    if (dayOfWeek > 1 && dayOfWeek < 7 && nowBefore1700()) {
                         logger.info("!!!!! ReminderThread ->  run -> sleepThreadBeforeTodayDutyInWeekdays() == {}", sleepThreadBeforeTodayDuty);
                         sleep(sleepThreadBeforeTodayDuty);
+                        logger.info("!!!!! ReminderThread ->  run -> sleepThreadBeforeTodayDutyInWeekdays() -> UP");
                         TelegramBotAssistant telegramBotAssistant = new TelegramBotAssistant();
                         telegramBotAssistant.sendReminderIn1600(today);
                     }
@@ -89,6 +90,18 @@ public class ReminderThread extends Thread {
         }
     }
 
+    private boolean nowBefore1700(){
+        GregorianCalendar now = new GregorianCalendar();
+
+        GregorianCalendar todayStartDuty1700 = new GregorianCalendar();
+        todayStartDuty1700.set(Calendar.HOUR_OF_DAY, 17);
+        todayStartDuty1700.set(Calendar.MINUTE, 0);
+        todayStartDuty1700.set(Calendar.SECOND, 0);
+
+        boolean nowBefore1700 = now.before(todayStartDuty1700);
+        logger.info("!!!!!  ReminderThread -> run -> nowBefore1700() == {}", nowBefore1700);
+        return nowBefore1700;
+    }
     private long sleepThreadBeforeTodayDutyInWeekdays() {// візівать при условии, если точноо будень день
         GregorianCalendar now = new GregorianCalendar();
 
