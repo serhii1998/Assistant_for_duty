@@ -3,7 +3,6 @@ package com.attendant.threads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Calendar;
@@ -15,23 +14,25 @@ public class UpTimeThread implements Runnable {
 
     private Logger logger = LoggerFactory.getLogger(UpTimeThread.class);
 
+    private int timeZoneDifference = 2;
+
     @Override
     public void run() {
 
         while (true) {
             GregorianCalendar doNotUpTimeAfter = new GregorianCalendar();
-            doNotUpTimeAfter.set(Calendar.HOUR_OF_DAY, 23);
-            doNotUpTimeAfter.set(Calendar.MINUTE, 35);
+            doNotUpTimeAfter.set(Calendar.HOUR_OF_DAY, 23 - timeZoneDifference);
+            doNotUpTimeAfter.set(Calendar.MINUTE, 30);
             doNotUpTimeAfter.set(Calendar.SECOND, 0);
 
             GregorianCalendar startUpTimeAfter = new GregorianCalendar();
             startUpTimeAfter.add(Calendar.DAY_OF_MONTH, 1);
-            startUpTimeAfter.set(Calendar.HOUR_OF_DAY, 8);
+            startUpTimeAfter.set(Calendar.HOUR_OF_DAY, 8 - timeZoneDifference);
             startUpTimeAfter.set(Calendar.MINUTE, 0);
             startUpTimeAfter.set(Calendar.SECOND, 0);
 
             GregorianCalendar todayStartUpTimeAfter = new GregorianCalendar();
-            todayStartUpTimeAfter.set(Calendar.HOUR_OF_DAY, 8);
+            todayStartUpTimeAfter.set(Calendar.HOUR_OF_DAY, 8 - timeZoneDifference);
             todayStartUpTimeAfter.set(Calendar.MINUTE, 0);
             todayStartUpTimeAfter.set(Calendar.SECOND, 0);
 
@@ -42,7 +43,7 @@ public class UpTimeThread implements Runnable {
                 sleepUpTimeThread(startUpTimeAfter, now);
             }
             logger.info("!!!! UpTimeThread -> run -> now.before(todayStartUpTimeAfter) == {}, now == {}, todayStartUpTimeAfter == {}", now.before(todayStartUpTimeAfter), now.getTime(), todayStartUpTimeAfter.getTime());
-            if (now.before(todayStartUpTimeAfter)){
+            if (now.before(todayStartUpTimeAfter)) {
                 sleepUpTimeThread(todayStartUpTimeAfter, now);
             }
 

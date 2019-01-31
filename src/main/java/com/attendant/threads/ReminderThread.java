@@ -10,10 +10,12 @@ import org.slf4j.LoggerFactory;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+
 public class ReminderThread extends Thread {
 
     private Logger logger = LoggerFactory.getLogger(ReminderThread.class);
     private boolean todayDatabaseHasAlreadyBeenUpdated = false;
+    private int timeZoneDifference = 2;
 
     public ReminderThread(String name) {
         super(name);
@@ -57,8 +59,9 @@ public class ReminderThread extends Thread {
                         telegramBotAssistant.sendReminder(mapReminders); // отправить напоминание
                     }
 
-                    long sleepThreadBeforeTodayDuty = sleepThreadBeforeTodayDutyInWeekdays();
+
                     if (dayOfWeek > 1 && dayOfWeek < 7 && nowBefore1700()) {
+                        long sleepThreadBeforeTodayDuty = sleepThreadBeforeTodayDutyInWeekdays();
                         logger.info("!!!!! ReminderThread ->  run -> sleepThreadBeforeTodayDutyInWeekdays() == {}", sleepThreadBeforeTodayDuty);
                         sleep(sleepThreadBeforeTodayDuty);
                         logger.info("!!!!! ReminderThread ->  run -> sleepThreadBeforeTodayDutyInWeekdays() -> UP");
@@ -94,7 +97,7 @@ public class ReminderThread extends Thread {
         GregorianCalendar now = new GregorianCalendar();
 
         GregorianCalendar todayStartDuty1700 = new GregorianCalendar();
-        todayStartDuty1700.set(Calendar.HOUR_OF_DAY, 17);
+        todayStartDuty1700.set(Calendar.HOUR_OF_DAY, 17-timeZoneDifference);
         todayStartDuty1700.set(Calendar.MINUTE, 0);
         todayStartDuty1700.set(Calendar.SECOND, 0);
 
@@ -106,7 +109,7 @@ public class ReminderThread extends Thread {
         GregorianCalendar now = new GregorianCalendar();
 
         GregorianCalendar todayStartDuty1600 = new GregorianCalendar();
-        todayStartDuty1600.set(Calendar.HOUR_OF_DAY, 16);
+        todayStartDuty1600.set(Calendar.HOUR_OF_DAY, 16-timeZoneDifference);
         todayStartDuty1600.set(Calendar.MINUTE, 0);
         todayStartDuty1600.set(Calendar.SECOND, 0);
 
@@ -134,7 +137,7 @@ public class ReminderThread extends Thread {
     private long canRunSendReminderOrNeedToWait() {
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         GregorianCalendar timeReminder = new GregorianCalendar();
-        timeReminder.set(Calendar.HOUR_OF_DAY, 9);
+        timeReminder.set(Calendar.HOUR_OF_DAY, 9-timeZoneDifference);
         timeReminder.set(Calendar.MINUTE, 0);
         timeReminder.set(Calendar.SECOND, 0);
 
@@ -150,7 +153,7 @@ public class ReminderThread extends Thread {
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         GregorianCalendar timeReminder = new GregorianCalendar();
         timeReminder.add(Calendar.DAY_OF_MONTH, 1);//добавляем к сегодняшней дате 1 день
-        timeReminder.set(Calendar.HOUR_OF_DAY, 8);
+        timeReminder.set(Calendar.HOUR_OF_DAY, 8-timeZoneDifference);
         timeReminder.set(Calendar.MINUTE, 0);
         timeReminder.set(Calendar.SECOND, 0);
 
