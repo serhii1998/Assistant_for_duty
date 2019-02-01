@@ -90,7 +90,7 @@ public class UtilsDB {
 
             if (resultSetChatId.next()) {
 
-                preparedStatement = connection.prepareStatement("update reminder_for_duty set number_room = ?, date_duty = ? ,send_confirmation_today = ?, send_confirmation_tomorrow = ?, send_confirmation_after_tomorrow = ? where chat_id = ?");
+                preparedStatement = connection.prepareStatement("update reminder_for_duty set number_room = ?, date_duty = ? ,send_confirmation_today = ?, send_confirmation_tomorrow = ?, send_confirmation_after_tomorrow = ?, send_confirmation_today_duty_in_1600 = false where chat_id = ?");
                 preparedStatement.setString(1, room);
                 preparedStatement.setString(2, strDateDuty);
                 preparedStatement.setBoolean(3, confirmations.get(0));
@@ -101,7 +101,7 @@ public class UtilsDB {
 
             } else {
 
-                preparedStatement = connection.prepareStatement("insert into reminder_for_duty (chat_id, number_room, date_duty, send_confirmation_today, send_confirmation_tomorrow, send_confirmation_after_tomorrow) values (?,?,?,?,?,?)");
+                preparedStatement = connection.prepareStatement("insert into reminder_for_duty (chat_id, number_room, date_duty, send_confirmation_today, send_confirmation_tomorrow, send_confirmation_after_tomorrow, send_confirmation_today_duty_in_1600) values (?,?,?,?,?,?,false)");
                 preparedStatement.setString(1, chatId);
                 preparedStatement.setString(2, room);
                 preparedStatement.setString(3, strDateDuty);
