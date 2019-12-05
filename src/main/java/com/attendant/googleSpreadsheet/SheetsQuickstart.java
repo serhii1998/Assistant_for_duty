@@ -21,7 +21,9 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 
-
+/**
+ * создает коннект к гугл таблицам getCredentials(), берет данные с таблицы infoAttendantGoogleSpreadsheet()
+ */
 public class SheetsQuickstart {
     private static final String APPLICATION_NAME = "Google Sheets API Java Quickstart";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -62,7 +64,7 @@ public class SheetsQuickstart {
     public static List<List<Object>> infoAttendantGoogleSpreadsheet(final String range) throws IOException, GeneralSecurityException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-//        final String spreadsheetId = "1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ";
+//        final String spreadsheetId = "1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ";  //старая таблица
         final String spreadsheetId = "1zr8LAZrBNCZJVWdptHRPBINRVyuhGgacEPiEcTU8zCs";
         //final String range = "Database!A2:S";
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
