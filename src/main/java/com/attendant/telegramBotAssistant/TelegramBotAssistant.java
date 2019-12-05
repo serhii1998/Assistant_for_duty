@@ -185,7 +185,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
                 if (sendMessage.getText().trim().equals("")) {
                     logger.info("-!-!-!-!-!-!-!-!-!- sendMsgSearchDateDutyInGoogleSpreadsheet -> sendMessage.getText().trim().equals(\"\") = true + {}", sendMessage.toString());
                     execute(sendMessage.setText("В графике пока нет даты следующего дежурства для комнаты " + room + ". Установи напоминание или " +
-                            " следи за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
+                            " следи за графиком здесь: https://docs.google.com/spreadsheets/d/1zr8LAZrBNCZJVWdptHRPBINRVyuhGgacEPiEcTU8zCs/edit#gid=73285756"));
                 } else {
                     logger.info("-!-!-!-!-!-!-!-!-!- sendMsgSearchDateDutyInGoogleSpreadsheet -> sendMessage.getText().trim().equals(\"\") = false + {}", sendMessage.toString());
                     execute(sendMessage);
