@@ -20,12 +20,10 @@ public class UtilsSpreadsheet {
         sendMessage.setText("");
         boolean existenceThisRoom = false; // флаг существования комнаты в гугл таблице.
         // Если ее там в гугл таблицах нет, то ее не нужно записывать в БД
-
         List<List<Object>> values;
         try {
-
             values = SheetsQuickstart.infoAttendantGoogleSpreadsheet("Database!A3:S"); // получаем заданную страницу в виде вдумерного массива
-            logger.info("******** UtilsSpreadsheet -> checkExistenceThisRoomAndSetDateDutyToSendMessage -> room(message) == {}, sendMessage == {}", room, sendMessage.toString());
+//            logger.info("******** UtilsSpreadsheet -> checkExistenceThisRoomAndSetDateDutyToSendMessage -> room(message) == {}, sendMessage == {}", room, sendMessage.toString());
             System.out.println(values);
             checkDate:
             if (values != null) {

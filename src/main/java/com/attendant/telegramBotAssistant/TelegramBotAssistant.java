@@ -28,7 +28,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
     private static Logger logger = LoggerFactory.getLogger(TelegramBotAssistant.class);
 
     @Override
-    public synchronized void onUpdateReceived(Update update) {
+    public void onUpdateReceived(Update update) {
         logger.info("onUpdateReceived");
         String message = update.getMessage().getText();
         String chatId = update.getMessage().getChatId().toString();
@@ -90,7 +90,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
 
     }
 
-    private synchronized void createReminderAndSendMessage(String room, String chatId) {
+    private void createReminderAndSendMessage(String room, String chatId) {
         logger.info("-!-!-!-!-!-!-!-!-!- TelegramBotAssistant -> createReminderAndSendMessage");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(room);
@@ -159,7 +159,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         }
     }
 
-    private synchronized void sendMsg(String message, String chatId) {
+    private void sendMsg(String message, String chatId) {
         SendMessage sendMessage = new SendMessage();
         setButtons(sendMessage, chatId);
         sendMessage.enableMarkdown(true);
@@ -173,7 +173,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         }
     }
 
-    private synchronized void sendMsgSearchDateDutyInGoogleSpreadsheet(String room, String chatId) {
+    private void sendMsgSearchDateDutyInGoogleSpreadsheet(String room, String chatId) {
         logger.info("-!-!-!-!-!-!-!-!-!- sendMsgSearchDateDutyInGoogleSpreadsheet");
         SendMessage sendMessage = new SendMessage();
         setButtons(sendMessage, chatId);
@@ -202,7 +202,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         }
     }
 
-    public synchronized static void setButtons(SendMessage sendMessage, String chatId) {
+    public static void setButtons(SendMessage sendMessage, String chatId) {
         logger.info("-!-!-!-!-!-!-!-!-!- setButtons");
         String room = getRoomRemainderByChatId(chatId).trim();
         //Создаем клавиуатуру

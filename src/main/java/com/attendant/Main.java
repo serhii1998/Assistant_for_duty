@@ -46,7 +46,6 @@ public class Main {
         Thread upTimeThread = new Thread(new UpTimeThread(), "UpTimeThread");
         upTimeThread.start();
 
-
         ReminderThread reminderThread = new ReminderThread("ReminderThread");
         reminderThread.start();
 
