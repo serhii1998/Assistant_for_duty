@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReminderEntity {
-
     private String chatId;
     private String numberRoom;
     private String dateDuty;
