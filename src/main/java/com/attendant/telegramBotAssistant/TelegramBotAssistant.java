@@ -304,11 +304,11 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "!!!Дежурство!!!";
+        return "assistant_for_duty_test";
     }
 
     @Override
     public String getBotToken() {
-        return "701533339:AAGZpsNPVAblKnbq_kxkYOcTMX3F4gJKlSg";
+        return "1000370416:AAHg5N4XaD5IyVcJgegDI8WaSa1T64T9H7k";
     }
 }
