@@ -1,7 +1,7 @@
 package com.attendant.threads;
 
 import com.attendant.googleSpreadsheet.SheetsQuickstart;
-import com.attendant.model.ReminderEntity;
+import com.attendant.entity.ReminderEntity;
 import com.attendant.telegramBotAssistant.TelegramBotAssistant;
 import com.attendant.utils.UtilsDB;
 import org.slf4j.Logger;

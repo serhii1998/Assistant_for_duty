@@ -1,6 +1,6 @@
 package com.attendant.telegramBotAssistant;
 
-import com.attendant.model.ReminderEntity;
+import com.attendant.entity.ReminderEntity;
 import com.attendant.utils.UtilsDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

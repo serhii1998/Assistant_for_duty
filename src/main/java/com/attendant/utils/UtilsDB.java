@@ -1,10 +1,8 @@
 package com.attendant.utils;
 
-import com.attendant.model.ReminderEntity;
+import com.attendant.entity.ReminderEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import sun.tools.java.Environment;
 
 import java.sql.*;
 import java.text.ParseException;
@@ -21,8 +19,6 @@ public class UtilsDB {
     //    private static final String USERNAME = "mgtbaprvcbyypo";
 //    private static final String PASSWORD = "ef60d37ff45a3acdc45bcf9cbb12f48cd72c42598ce69dafb83a4e03b59dc7e5";
 //    private static final String URL = "jdbc:postgresql://ec2-46-137-121-216.eu-west-1.compute.amazonaws.com:5432/dcueq2i18kqeuu";
-//    @Autowired
-//    private Environment environment;
 
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "postgres";
