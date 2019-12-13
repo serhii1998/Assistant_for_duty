@@ -20,7 +20,6 @@ import java.util.Map;
 import static com.attendant.utils.UtilsSpreadsheet.*;
 import static com.attendant.utils.UtilsDB.*;
 
-
 public class TelegramBotAssistant extends TelegramLongPollingBot {
 
     private boolean checkCreateReminder = false; // флаг, означающий, что пользователь хочет установить напоминание
