@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 import static com.attendant.utils.CommonUtils.todayBeforeOrEqualsThisDate;
 
@@ -22,7 +22,7 @@ public class UtilsDB {
 
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "postgres";
-    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
+    private static final String URL = "jdbc:postgresql://assistant.cqr9tttt5wtt.us-east-1.rds.amazonaws.com:5432/postgres";
 
 
     private static Connection dataConnection() throws ClassNotFoundException, SQLException {
