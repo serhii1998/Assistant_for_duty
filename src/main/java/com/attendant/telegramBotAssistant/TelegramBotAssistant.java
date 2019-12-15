@@ -123,7 +123,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
                         execute(sendMessage.setText("Напоминание создано для комнаты " + room + ". Пока следующей даты дежурства нет. " +
                                 "Я буду уведомлять тебя о наступлении дежурства в течении 3-х дней перед " +
                                 "дежурством, включая день дежурства." +
-                                " Следи за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
+                                " Следи за графиком здесь: https://docs.google.com/spreadsheets/d/1zr8LAZrBNCZJVWdptHRPBINRVyuhGgacEPiEcTU8zCs/edit#gid=746677725"));
 
                     } catch (Exception e) {
                         logger.warn("-!-!-!-!-!-!-!-!-!- sendMsgSearchDateDutyInGoogleSpreadsheet -> dateDuty.equals(\"\") CATCH");
