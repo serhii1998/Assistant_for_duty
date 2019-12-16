@@ -1,6 +1,6 @@
 package com.attendant.telegramBotAssistant;
 
-import com.attendant.model.ReminderEntity;
+import com.attendant.entity.ReminderEntity;
 import com.attendant.utils.UtilsDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,6 @@ import java.util.Map;
 import static com.attendant.utils.UtilsSpreadsheet.*;
 import static com.attendant.utils.UtilsDB.*;
 
-
 public class TelegramBotAssistant extends TelegramLongPollingBot {
 
     private boolean checkCreateReminder = false; // флаг, означающий, что пользователь хочет установить напоминание
@@ -28,7 +27,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
     private static Logger logger = LoggerFactory.getLogger(TelegramBotAssistant.class);
 
     @Override
-    public synchronized void onUpdateReceived(Update update) {
+    public void onUpdateReceived(Update update) {
         logger.info("onUpdateReceived");
         String message = update.getMessage().getText();
         String chatId = update.getMessage().getChatId().toString();
@@ -90,7 +89,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
 
     }
 
-    private synchronized void createReminderAndSendMessage(String room, String chatId) {
+    private void createReminderAndSendMessage(String room, String chatId) {
         logger.info("-!-!-!-!-!-!-!-!-!- TelegramBotAssistant -> createReminderAndSendMessage");
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(room);
@@ -124,7 +123,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
                         execute(sendMessage.setText("Напоминание создано для комнаты " + room + ". Пока следующей даты дежурства нет. " +
                                 "Я буду уведомлять тебя о наступлении дежурства в течении 3-х дней перед " +
                                 "дежурством, включая день дежурства." +
-                                " Следи за графиком здесь: https://docs.google.com/spreadsheets/d/1emj4PwGeoEhagVu9YlydMjwgLyxtbf8N5wa7Ai7Z7PQ/edit#gid=1096564453"));
+                                " Следи за графиком здесь: https://docs.google.com/spreadsheets/d/1zr8LAZrBNCZJVWdptHRPBINRVyuhGgacEPiEcTU8zCs/edit#gid=746677725"));
 
                     } catch (Exception e) {
                         logger.warn("-!-!-!-!-!-!-!-!-!- sendMsgSearchDateDutyInGoogleSpreadsheet -> dateDuty.equals(\"\") CATCH");
@@ -159,7 +158,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         }
     }
 
-    private synchronized void sendMsg(String message, String chatId) {
+    private void sendMsg(String message, String chatId) {
         SendMessage sendMessage = new SendMessage();
         setButtons(sendMessage, chatId);
         sendMessage.enableMarkdown(true);
@@ -173,7 +172,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         }
     }
 
-    private synchronized void sendMsgSearchDateDutyInGoogleSpreadsheet(String room, String chatId) {
+    private void sendMsgSearchDateDutyInGoogleSpreadsheet(String room, String chatId) {
         logger.info("-!-!-!-!-!-!-!-!-!- sendMsgSearchDateDutyInGoogleSpreadsheet");
         SendMessage sendMessage = new SendMessage();
         setButtons(sendMessage, chatId);
@@ -202,7 +201,7 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
         }
     }
 
-    public synchronized static void setButtons(SendMessage sendMessage, String chatId) {
+    public static void setButtons(SendMessage sendMessage, String chatId) {
         logger.info("-!-!-!-!-!-!-!-!-!- setButtons");
         String room = getRoomRemainderByChatId(chatId).trim();
         //Создаем клавиуатуру
@@ -304,11 +303,11 @@ public class TelegramBotAssistant extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "!!!Дежурство!!!";
+        return "assistant_for_duty_test";
     }
 
     @Override
     public String getBotToken() {
-        return "701533339:AAGZpsNPVAblKnbq_kxkYOcTMX3F4gJKlSg";
+        return "1000370416:AAHg5N4XaD5IyVcJgegDI8WaSa1T64T9H7k";
     }
 }
